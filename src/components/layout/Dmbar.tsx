@@ -57,7 +57,7 @@ export default function DmBar() {
       ref={dmBarRef}
       data-dmbar
       className={clsx(
-        "bg-[#121214] text-white flex flex-col h-full relative pb-[72px] flex-none shrink-0 border border-[#202024]",
+        "bg-[#121214] text-white flex flex-col h-full relative pb-[72px] flex-none shrink-0 border border-(--border-normal) ",
         isResizing && "select-none"
       )}
       style={{

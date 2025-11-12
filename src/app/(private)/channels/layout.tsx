@@ -9,15 +9,20 @@ interface ChannelsLayoutProps {
 
 export default function ChannelsLayout({ children }: ChannelsLayoutProps) {
   return (
-    <>
+    <div className="flex flex-col h-screen w-screen bg-[#121214] text-white">
+      {/* شريط الأعلى */}
       <TopBar />
-      <div className="flex flex-1 h-[calc(100vh-3rem)] overflow-hidden">
-        {/* السيرفر بار على الشمال */}
+
+      {/* الحاوية الرئيسية */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* شريط السيرفرات على اليسار */}
         <ServersBar />
 
         {/* المحتوى الرئيسي */}
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 overflow-auto">
+          {children}
+        </main>
       </div>
-    </>
+    </div>
   );
 }

@@ -6,7 +6,7 @@ export default function TopBar() {
 
 
   return (
-    <header className="flex items-center justify-between bg-[#121214] h-12 border-b border-[#121214] shadow-md shrink-0">
+    <header className="flex items-center justify-between bg-[#121214] shadow-md shrink-0">
       {/* Left - Navigation */}
       <div className="flex items-center gap-3">
         <button 
