@@ -25,7 +25,7 @@ export function PrimaryButton({
       disabled={disabled || isLoading}
       className={cn(
         'inline-flex items-center justify-center',
-        'h-12 px-6 py-3 rounded-lg',
+        'h-12 px-6 py-3 rounded-xl',
         'bg-(--accent-primary) text-white',
         'font-medium text-base',
         'transition-all duration-200',

@@ -11,6 +11,7 @@ import { SelectInput } from "../ui/select-input";
 import { CustomCheckbox } from "../ui/custom-checkbox";
 import { authApi } from "../lib/authApi";
 import { z } from "zod";
+import Tooltip from "../ui/Tooltip";
 
 const currentYear = new Date().getFullYear();
 
@@ -29,6 +30,7 @@ export const registerSchema = z
     day: z.string().min(1, "Day is required"),
     year: z.string().min(1, "Year is required"),
     isEmailUpdatesChecked: z.boolean().optional(),
+    acceptedTerms: z.boolean().optional(),
   })
   .refine(
     (data) => {
@@ -102,6 +104,11 @@ export function RegisterForm() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
+      if (!watchedValues.acceptedTerms) {
+        setFormError("You must agree to the Terms of Service to register.");
+        return;
+      }
+
       setFormError(null);
 
       const birthdate = `${Number(data.year)}-${Number(data.month)
@@ -133,6 +140,8 @@ export function RegisterForm() {
     }
   };
 
+  const isSubmitDisabled = isSubmitting || !watchedValues.acceptedTerms;
+
   return (
     <div className="max-w-lg mx-auto auth-form-animation">
       <div className="bg-(--bg-secondary) rounded-lg p-8">
@@ -147,68 +156,68 @@ export function RegisterForm() {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Input
-            {...hookRegister("email")}
-            label="Email *"
-            type="email"
-            placeholder="Enter your email"
-            className="h-11"
-            error={!!errors.email}
-            errorMessage={errors.email?.message}
-          />
-          <Input
-            {...hookRegister("displayName")}
-            label="Display Name"
-            type="text"
-            placeholder="Enter your display name"
-            className="h-11"
-          />
-          <Input
-            {...hookRegister("username")}
-            label="Username *"
-            type="text"
-            placeholder="Enter your username"
-            className="h-11"
-            error={!!errors.username}
-            errorMessage={errors.username?.message}
-          />
-          <Input
-            {...hookRegister("password")}
-            label="Password *"
-            type="password"
-            placeholder="Enter your password"
-            className="h-11"
-            error={!!errors.password}
-            errorMessage={errors.password?.message}
-          />
+          <div className="flex flex-col gap-4">
+            <Input
+              {...hookRegister("email")}
+              label="Email *"
+              type="email"
+              className="h-11"
+              error={!!errors.email}
+              errorMessage={errors.email?.message}
+            />
+            <Input
+              {...hookRegister("displayName")}
+              label="Display Name"
+              type="text"
+              className="h-11"
+            />
+            <Input
+              {...hookRegister("username")}
+              label="Username *"
+              type="text"
+              className="h-11"
+              error={!!errors.username}
+              errorMessage={errors.username?.message}
+            />
+            <Input
+              {...hookRegister("password")}
+              label="Password *"
+              type="password"
+              className="h-11"
+              error={!!errors.password}
+              errorMessage={errors.password?.message}
+            />
 
-          <div>
-            <label className="block text-sm font-medium text-(--text-primary) mb-2">
-              Date of Birth *
-            </label>
-            <div className="grid grid-cols-3 gap-3">
-              <SelectInput
-                options={monthOptions}
-                value={watchedValues.month || ""}
-                onChange={(val) => setValue("month", val)}
-                placeholder="Month"
-              />
-              <SelectInput
-                options={dayOptions}
-                value={watchedValues.day || ""}
-                onChange={(val) => setValue("day", val)}
-                placeholder="Day"
-              />
-              <SelectInput
-                options={yearOptions}
-                value={watchedValues.year || ""}
-                onChange={(val) => setValue("year", val)}
-                placeholder="Year"
-              />
+            <div>
+              <label className="block text-sm font-medium text-(--text-primary) mb-2">
+                Date of Birth *
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                <SelectInput
+                  options={monthOptions}
+                  value={watchedValues.month || ""}
+                  onChange={(val) => setValue("month", val)}
+                  placeholder="Month"
+                />
+                <SelectInput
+                  options={dayOptions}
+                  value={watchedValues.day || ""}
+                  onChange={(val) => setValue("day", val)}
+                  placeholder="Day"
+                />
+                <SelectInput
+                  options={yearOptions}
+                  value={watchedValues.year || ""}
+                  onChange={(val) => setValue("year", val)}
+                  placeholder="Year"
+                />
+              </div>
+              {errors.day && (
+                <p className="text-red-400 text-sm mt-1">
+                  {errors.day.message}
+                </p>
+              )}
             </div>
-            {errors.day && (
-              <p className="text-red-400 text-sm mt-1">{errors.day.message}</p>
-            )}
           </div>
 
           <CustomCheckbox
@@ -218,26 +227,49 @@ export function RegisterForm() {
             onChange={(checked) => setValue("isEmailUpdatesChecked", checked)}
           />
 
-          <p className="text-sm text-(--text-secondary)">
-            By clicking "Create Account," you agree to Discord's{" "}
-            <Link href="#" className="text-(--accent-link) hover:underline">
-              Terms of Service
-            </Link>{" "}
-            and have read the{" "}
-            <Link href="#" className="text-(--accent-link) hover:underline">
-              Privacy Policy
-            </Link>
-            .
-          </p>
+          <div className="flex items-start gap-3">
+            <CustomCheckbox
+              id="agree-terms"
+              checked={watchedValues.acceptedTerms || false}
+              onChange={(checked) => setValue("acceptedTerms", checked)}
+            />
+            <p className="text-sm text-(--text-secondary)">
+              I have read and agree to Discord's{" "}
+              <Link href="#" className="text-(--accent-link) hover:underline">
+                Terms of Service
+              </Link>{" "}
+              and have read the{" "}
+              <Link href="#" className="text-(--accent-link) hover:underline">
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </div>
 
-          <PrimaryButton
-            type="submit"
-            isLoading={isSubmitting}
-            disabled={isSubmitting}
-            className="w-full bg-(--accent-primary) hover:bg-(--accent-hover) text-(--text-primary) font-medium py-3 px-4 rounded h-12 text-base transition-colors"
-          >
-            {isSubmitting ? "Creating Account..." : "Create Account"}
-          </PrimaryButton>
+          <div>
+            {(() => {
+              const button = (
+                <PrimaryButton
+                  type="submit"
+                  isLoading={isSubmitting}
+                  disabled={isSubmitDisabled}
+                  className="w-full bg-(--accent-primary) cursor-pointer hover:bg-(--accent-hover) text-(--text-primary) font-medium py-3 px-4 h-10 text-base transition-colors"
+                >
+                  {isSubmitting ? "Creating Account..." : "Create Account"}
+                </PrimaryButton>
+              );
+
+              return isSubmitDisabled ? (
+                <div className="w-full">
+                  <Tooltip text="you need to agree to or terms of service to continue">
+                    {button}
+                  </Tooltip>
+                </div>
+              ) : (
+                <div className="w-full">{button}</div>
+              );
+            })()}
+          </div>
         </form>
 
         <p className="mt-3 text-sm text-(--text-secondary) text-center">

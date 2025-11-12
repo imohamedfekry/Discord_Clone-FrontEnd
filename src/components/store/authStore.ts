@@ -20,15 +20,15 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
     user: null,
     token:
-        typeof window !== "undefined" ? localStorage.getItem("accessToken") : null,
+        typeof window !== "undefined" ? localStorage.getItem("Authorization") : null,
     isLoading: false,
 
     login: async (email, password) => {
         set({ isLoading: true });
         try {
             const res = await authApi.login({ email, password });
-            localStorage.setItem("accessToken", res.data.accessToken);
-            set({ token: res.data.accessToken });
+            localStorage.setItem("Authorization", res.data.Authorization);
+            set({ token: res.data.Authorization });
             await useAuthStore.getState().fetchUser();
         } finally {
             set({ isLoading: false });
@@ -39,8 +39,8 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ isLoading: true });
         try {
             const res = await authApi.register(data);
-            localStorage.setItem("accessToken", res.data.accessToken);
-            set({ token: res.data.accessToken });
+            localStorage.setItem("Authorization", res.data.Authorization);
+            set({ token: res.data.Authorization });
             await useAuthStore.getState().fetchUser();
         } finally {
             set({ isLoading: false });
@@ -57,7 +57,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     },
 
     logout: () => {
-        localStorage.removeItem("accessToken");
+        localStorage.removeItem("Authorization");
         set({ user: null, token: null });
     },
 }));

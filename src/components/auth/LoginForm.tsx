@@ -53,9 +53,9 @@ export function LoginForm() {
   };
 
   return (
-    <div className="auth-form-animation bg-(--bg-secondary) rounded-lg p-8 flex flex-col sm:flex-row max-w-205 mx-auto">
+    <div className="auth-form-animation bg-(--bg-secondary) rounded-lg p-8 flex flex-col sm:flex-row max-w-200 mx-auto">
       <div className="flex-2">
-        <div className="w-[88%]">
+        <div className="sm:w-[85%]">
           <h1 className="text-2xl font-semibold text-(--text-primary) mb-2 text-center">
             Welcome back!
           </h1>
@@ -63,28 +63,34 @@ export function LoginForm() {
             We're so excited to see you again!
           </p>
 
-          {formError && (
-            <p className="text-red-400 text-sm mb-2 text-center">{formError}</p>
-          )}
-
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <Input
-              {...register("email")}
-              label="Email or Phone Number *"
-              type="email"
-              className="h-11"
-              error={!!errors.email}
-              errorMessage={errors.email?.message}
-            />
+            <div className="flex flex-col gap-3 m-0">
+              <div>
+                <Input
+                  {...register("email")}
+                  label="Email or Phone Number *"
+                  type="email"
+                  className="h-11"
+                  error={!!errors.email}
+                  errorMessage={errors.email?.message}
+                />
+                {formError && <p className="text-red-400">{formError}</p>}
+              </div>
 
-            <Input
-              {...register("password")}
-              label="Password *"
-              type="password"
-              className="h-11"
-              error={!!errors.password}
-              errorMessage={errors.password?.message}
-            />
+              <div>
+                <Input
+                  {...register("password")}
+                  label="Password *"
+                  type="password"
+                  className="h-11"
+                  error={!!errors.password}
+                  errorMessage={errors.password?.message}
+                />
+                {formError && (
+                  <p className="text-red-400 text-sm">{formError}</p>
+                )}
+              </div>
+            </div>
 
             <Link
               href="#"
@@ -97,7 +103,7 @@ export function LoginForm() {
               type="submit"
               isLoading={isSubmitting}
               disabled={isSubmitting}
-              className="w-full bg-(--accent-primary) hover:bg-(--accent-hover) text-(--text-primary) font-medium py-3 px-4 rounded h-10 text-base transition-colors"
+              className="mt-3 cursor-pointer w-full bg-(--accent-primary) hover:bg-(--accent-hover) text-(--text-primary) font-medium py-3 px-4 h-10 text-base transition-colors"
             >
               {isSubmitting ? "Logging In..." : "Log In"}
             </PrimaryButton>
@@ -113,32 +119,32 @@ export function LoginForm() {
             </Link>
           </p>
         </div>
-        </div>
+      </div>
 
-        <div className="flex-1 items-center justify-center hidden sm:flex">
-          <div className="text-center">
-            <div className="w-44 h-44 mx-auto bg-white rounded-lg flex items-center justify-center mb-4 p-2">
-              <img
-                src="https://api.qrserver.com/v1/create-qr-code/?size=128x128&data=discord-login"
-                alt="Discord QR Code"
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <h2 className="text-xl font-semibold text-(--text-primary) mb-2">
-              Log in with QR Code
-            </h2>
-            <p className="text-(--text-secondary) text-sm mb-6">
-              Scan this with the <strong>Discord mobile app</strong> to log in
-              instantly.
-            </p>
-            <Link
-              href="#"
-              className="text-(--accent-link) hover:underline text-sm"
-            >
-              Or, sign in with passkey
-            </Link>
+      <div className="flex-1 items-center justify-center hidden sm:flex">
+        <div className="text-center">
+          <div className="w-44 h-44 mx-auto bg-white rounded-lg flex items-center justify-center mb-4 p-2">
+            <img
+              src="https://api.qrserver.com/v1/create-qr-code/?size=128x128&data=discord-login"
+              alt="Discord QR Code"
+              className="w-full h-full object-contain"
+            />
           </div>
+          <h2 className="text-xl font-semibold text-(--text-primary) mb-2">
+            Log in with QR Code
+          </h2>
+          <p className="text-(--text-secondary) text-sm mb-6">
+            Scan this with the <strong>Discord mobile app</strong> to log in
+            instantly.
+          </p>
+          <Link
+            href="#"
+            className="text-(--accent-link) hover:underline text-sm"
+          >
+            Or, sign in with passkey
+          </Link>
         </div>
       </div>
+    </div>
   );
 }

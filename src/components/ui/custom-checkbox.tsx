@@ -5,7 +5,7 @@ import { cn } from '../utils/cn'
 
 interface CustomCheckboxProps {
   id: string
-  label: string
+  label?: string
   checked?: boolean
   onChange?: (checked: boolean) => void
   className?: string
@@ -50,7 +50,7 @@ export function CustomCheckbox({
         <label
           htmlFor={id}
           className={cn(
-            'flex items-center justify-center w-5 h-5 border-2 border-[#202225] rounded cursor-pointer hover:border-[#5865f2] transition-all duration-300 hover:bg-[#2f3136]/20',
+            'flex items-center justify-center w-6 h-6 border border-[#7c8597] rounded cursor-pointer  transition-all duration-300',
             isChecked && 'bg-[#5865f2] border-[#5865f2]',
             disabled && 'opacity-50 cursor-not-allowed'
           )}
@@ -67,6 +67,7 @@ export function CustomCheckbox({
           </svg>
         </label>
       </div>
+      {label && (
         <label
           htmlFor={id}
           className={cn(
@@ -75,8 +76,9 @@ export function CustomCheckbox({
             labelClassName
           )}
         >
-        {label}
-      </label>
+          {label}
+        </label>
+      )}
     </div>
   )
 }

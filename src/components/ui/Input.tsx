@@ -11,7 +11,7 @@ export interface InputProps
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type = "text", error, errorMessage, label, ...props }, ref) => {
     return (
-      <div className="w-full flex flex-col">
+      <div className="w-full flex flex-col m-0">
         {/* Label */}
         {label && (
           <label className="text-(--text-primary) text-sm mb-1">
