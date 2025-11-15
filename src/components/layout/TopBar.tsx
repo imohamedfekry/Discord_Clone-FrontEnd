@@ -6,11 +6,11 @@ export default function TopBar() {
 
 
   return (
-    <header className="flex items-center justify-between bg-[#121214] shadow-md shrink-0">
+    <header className="flex items-center justify-between bg-(--background-base-lowest) shadow-md shrink-0 ">
       {/* Left - Navigation */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3"> 
         <button 
-          className="text-[#b5bac1] hover:text-white transition-colors p-1.5 rounded hover:bg-[#35373c]"
+          className="text-(--text-secondary) hover:text-(--text-primary) transition-colors p-1.5 rounded hover:bg-(--background-secondary)"
           aria-label="Back"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
@@ -18,7 +18,7 @@ export default function TopBar() {
           </svg>
         </button>
         <button 
-          className="text-[#b5bac1] hover:text-white transition-colors p-1.5 rounded hover:bg-[#35373c]"
+          className="text-(--text-secondary) hover:text-(--text-primary) transition-colors p-1.5 rounded hover:bg-(--background-secondary)"
           aria-label="Forward"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
@@ -29,7 +29,7 @@ export default function TopBar() {
 
       {/* Middle - Title */}
       <div className="flex-1 text-left ml-6">
-        <h1 className="text-white text-[15px] font-semibold text-center">
+        <h1 className="text-(--text-primary) text-[15px] font-semibold text-center">
          test title
         </h1>
       </div>

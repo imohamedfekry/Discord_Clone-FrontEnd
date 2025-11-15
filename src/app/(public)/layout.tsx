@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import authBack from "@/components/assets/images/authBack.svg";
-import discordWithLetter from "@/components/assets/icons/discrodlogo_Letter.svg";
+import { DiscordWithLetter } from "@/components/assets/icons/discrodlogo_Letter";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -21,13 +21,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
 
       {/* Discord Logo */}
       <div className="absolute top-8 left-8 z-20">
-        <Image
-          src={discordWithLetter}
-          alt="Discord Logo"
-          width={140}
-          height={140}
-          draggable={false}
-        />
+              <DiscordWithLetter className="w-[124px] h-6 text-white" />
       </div>
 
       {/* Page Content */}

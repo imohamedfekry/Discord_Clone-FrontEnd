@@ -145,7 +145,7 @@ export function SelectInput({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute z-50 w-full bottom-full mb-1 bg-(--background-surface-higher) border border-(--border-primary) rounded-lg shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-50 w-full bottom-full mb-1 bg-(--background-surface-high) border border-(--border-primary) rounded-lg shadow-lg max-h-60 overflow-auto">
           {options.map((option: SelectOption, index: number) => (
             <div
               key={option.value}
@@ -154,10 +154,10 @@ export function SelectInput({
               onMouseEnter={() => handleMouseEnter(index)}
               className={cn(
                 'px-4 py-3 cursor-pointer transition-colors text-sm text-(--text-secondary)',
-                'hover:bg-(--bg-hover) focus:bg-(--bg-hover) focus:outline-none',
+                'hover:bg-(--background-secondary) focus:bg-(--background-secondary) focus:outline-none',
                 'first:rounded-t-lg last:rounded-b-lg',
-                highlightedIndex === index && 'bg-(--bg-hover)',
-                value === option.value && 'bg-(--bg-hover) text-(--text-secondary) hover:bg-(--bg-hover)'
+                highlightedIndex === index && 'bg-(--background-secondary)',
+                value === option.value && 'bg-(--background-secondary) text-(--text-primary) hover:bg-(--background-secondary)'
               )}
             >
               <div className="flex items-center justify-between">

@@ -9,15 +9,3 @@ export const api = axios.create({
     "Content-Type": "application/json",
   },
 });
-
-// interceptor للـ errors
-api.interceptors.response.use(
-  res => res,
-  err => {
-    if (err.response?.status === 401) {
-      // Token expired أو invalid
-      window.location.href = "/login";
-    }
-    throw err;
-  }
-);

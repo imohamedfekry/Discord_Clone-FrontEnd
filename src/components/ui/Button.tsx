@@ -15,9 +15,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const variants = {
       default: "bg-[var(--accent-primary)] text-white hover:bg-[hsl(var(--accent-primary-h),var(--accent-primary-s),calc(var(--accent-primary-l)-var(--hover-darken)))] focus-visible:ring-[var(--border-focus)]",
       destructive: "bg-[var(--accent-danger)] text-white hover:bg-[hsl(var(--accent-danger-h),var(--accent-danger-s),calc(var(--accent-danger-l)-var(--hover-darken)))]",
-      outline: "border border-[var(--border-primary)] bg-[var(--bg-input)] text-[var(--text-primary)] hover:bg-[hsl(var(--bg-input-h),var(--bg-input-s),calc(var(--bg-input-l)-var(--hover-darken)))]",
-      secondary: "bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:bg-[hsl(var(--bg-secondary-h),var(--bg-secondary-s),calc(var(--bg-secondary-l)-var(--hover-darken)))]",
-      ghost: "text-[var(--text-primary)] hover:bg-[hsl(var(--bg-input-h),var(--bg-input-s),calc(var(--bg-input-l)-var(--hover-darken)))]",
+      outline: "border border-[var(--border-primary)] bg-[var(--bg-input)] text-[var(--text-primary)] hover:bg-[var(--background-secondary)]",
+      secondary: "bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:bg-[var(--background-secondary-alt)]",
+      ghost: "text-[var(--text-primary)] hover:bg-[var(--background-secondary)]",
       link: "text-[var(--accent-link)] underline-offset-4 hover:underline",
     }
 

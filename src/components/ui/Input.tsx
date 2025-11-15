@@ -14,7 +14,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <div className="w-full flex flex-col m-0">
         {/* Label */}
         {label && (
-          <label className="text-(--text-primary) text-sm mb-1">
+          <label className="text-(--text-primary) text-sm mb-1 font-medium">
             {label}
           </label>
         )}
@@ -27,10 +27,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "bg-(--bg-input) text-(--text-primary)",
             "border border-(--border-primary)",
             "transition-all duration-200 outline-none",
+            "focus:border-(--border-focus) focus:ring-2 focus:ring-(--border-focus) focus:ring-opacity-20",
             "disabled:cursor-not-allowed disabled:opacity-50",
             "placeholder:text-(--text-placeholder)",
             "file:border-0 file:bg-transparent file:text-sm file:font-medium",
-            error && "border-(--accent-danger)",
+            error && "border-(--accent-danger) focus:border-(--accent-danger) focus:ring-(--accent-danger)",
             className
           )}
           ref={ref}

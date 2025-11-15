@@ -180,7 +180,7 @@ const getArrowStyle = (): CSSProperties => {
     position: "absolute",
     width: size * 2,
     height: size * 2,
-    background: "#29292d",
+    background: "var(--background-secondary-alt)",
     zIndex: 0,
   };
 
@@ -297,12 +297,12 @@ const getArrowStyle = (): CSSProperties => {
     >
       {/* البالون */}
       <div
-        className={`relative px-3 py-2 border border-(--border-normal) rounded-md text-sm font-semibold whitespace-nowrap bg-[#29292d] text-white shadow-[0_6px_20px_rgba(0,0,0,0.6)] overflow-hidden ${className}`}
+        className={`relative px-3 py-2 border border-(--border-normal) rounded-md text-sm font-semibold whitespace-nowrap bg-(--background-secondary-alt) text-(--text-primary) shadow-[0_6px_20px_rgba(0,0,0,0.6)] overflow-hidden ${className}`}
       >
         {text}
       </div>
       {/* السهم */}
-      <div aria-hidden style={getArrowStyle()} />
+      <div aria-hidden  style={getArrowStyle()} />
     </div>
   );
   return (

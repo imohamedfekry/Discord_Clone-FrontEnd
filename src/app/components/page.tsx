@@ -7,7 +7,6 @@ import { CustomCheckbox } from "../../components/ui/custom-checkbox";
 import { SelectInput } from "../../components/ui/select-input";
 import Tooltip from "../../components/ui/Tooltip";
 import { Badge } from "@/components/ui/Badge";
-import { Star } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 
 export default function Page() {
@@ -38,7 +37,9 @@ export default function Page() {
           <h2 className="text-lg font-medium mb-2">Badge</h2>
           <Badge count={5} color="red" />
           <Badge label="New" color="gray" />
-          <Badge icon={Star} label="Pro" color="green" />{" "}
+          <Badge icon={
+              <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"><path fill="currentColor" fillRule="evenodd" d="M12 23a11 11 0 1 0 0-22 11 11 0 0 0 0 22Zm1-18a1 1 0 1 0-2 0v7c0 .27.1.52.3.7l3 3a1 1 0 0 0 1.4-1.4L13 11.58V5Z" clipRule="evenodd" className=""></path></svg>
+          } label="Pro" color="green" />{" "}
         </div>
       </section>
 

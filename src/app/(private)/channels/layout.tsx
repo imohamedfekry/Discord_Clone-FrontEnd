@@ -1,6 +1,7 @@
 "use client";
 import ServersBar from "@/components/layout/ServersBar";
 import TopBar from "@/components/layout/TopBar";
+import UserPanel from "@/components/layout/UserPanel";
 import React, { ReactNode } from "react";
 
 interface ChannelsLayoutProps {
@@ -12,7 +13,7 @@ export default function ChannelsLayout({ children }: ChannelsLayoutProps) {
     <div className="flex flex-col h-screen w-screen bg-[#121214] text-white">
       {/* شريط الأعلى */}
       <TopBar />
-
+      <UserPanel />
       {/* الحاوية الرئيسية */}
       <div className="flex flex-1 overflow-hidden">
         {/* شريط السيرفرات على اليسار */}

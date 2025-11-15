@@ -29,7 +29,7 @@ export function PrimaryButton({
         'bg-(--accent-primary) text-white',
         'font-medium text-base',
         'transition-all duration-200',
-        'hover:bg-[hsl(var(--accent-primary-h),var(--accent-primary-s),calc(var(--accent-primary-l)-var(--hover-darken)))] hover:shadow-md',
+        'hover:bg-(hsl(var(--accent-primary-h),var(--accent-primary-s),calc(var(--accent-primary-l)-var(--hover-darken)))) hover:shadow-md',
         'active:bg-[hsl(var(--accent-primary-h),var(--accent-primary-s),calc(var(--accent-primary-l)-var(--active-darken)))] active:translate-y-0 active:shadow-sm',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--border-focus)',
         'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0',

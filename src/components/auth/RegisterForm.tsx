@@ -143,15 +143,15 @@ export function RegisterForm() {
   const isSubmitDisabled = isSubmitting || !watchedValues.acceptedTerms;
 
   return (
-    <div className="max-w-lg mx-auto auth-form-animation">
-      <div className="bg-(--bg-secondary) rounded-lg p-8">
+    <div className="max-w-lg mx-auto auth-form-animation bg-(--bg-secondary)">
+      <div className="modal-background rounded-lg p-8">
         <h1 className="text-2xl font-semibold text-(--text-primary) text-center mb-4">
           Create an account
         </h1>
 
         {formError && (
-          <div className="mb-4 p-3 bg-red-900/20 border border-red-500/50 rounded-lg">
-            <p className="text-red-300 text-sm text-center">{formError}</p>
+          <div className="mb-4 p-3 bg-(--accent-danger)/20 border border-(--accent-danger)/50 rounded-lg">
+            <p className="text-(--accent-danger) text-sm text-center">{formError}</p>
           </div>
         )}
 
@@ -213,7 +213,7 @@ export function RegisterForm() {
                 />
               </div>
               {errors.day && (
-                <p className="text-red-400 text-sm mt-1">
+                <p className="text-(--accent-danger) text-sm mt-1">
                   {errors.day.message}
                 </p>
               )}
@@ -253,7 +253,7 @@ export function RegisterForm() {
                   type="submit"
                   isLoading={isSubmitting}
                   disabled={isSubmitDisabled}
-                  className="w-full bg-(--accent-primary) cursor-pointer hover:bg-(--accent-hover) text-(--text-primary) font-medium py-3 px-4 h-10 text-base transition-colors"
+                  className="w-full"
                 >
                   {isSubmitting ? "Creating Account..." : "Create Account"}
                 </PrimaryButton>

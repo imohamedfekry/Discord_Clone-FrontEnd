@@ -2,6 +2,7 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { authApi } from "@/components/lib/authApi";
+import { isPublicPage } from "@/config/env";
 
 interface AuthContextType {
   user: any | null;
@@ -20,6 +21,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const fetchMe = async () => {
+      // تحقق من الصفحة الحالية - لا نستدعي getMe على الصفحات العامة
+      const currentPath = window.location.pathname;
+      
+      if (isPublicPage(currentPath)) {
+        setLoading(false);
+        return;
+      }
+
       try {
         console.log("🔁 Fetching user via authApi.getMe()");
         const data = await authApi.getMe();

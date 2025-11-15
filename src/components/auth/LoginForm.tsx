@@ -56,7 +56,7 @@ export function LoginForm() {
     <div className="auth-form-animation bg-(--bg-secondary) rounded-lg p-8 flex flex-col sm:flex-row max-w-200 mx-auto">
       <div className="flex-2">
         <div className="sm:w-[85%]">
-          <h1 className="text-2xl font-semibold text-(--text-primary) mb-2 text-center">
+          <h1 className="text-2xl font-semibold text-(--text-primary) text-center">
             Welcome back!
           </h1>
           <p className="text-(--text-secondary) text-base text-center mb-5">
@@ -74,7 +74,7 @@ export function LoginForm() {
                   error={!!errors.email}
                   errorMessage={errors.email?.message}
                 />
-                {formError && <p className="text-red-400">{formError}</p>}
+                {formError && <p className="text-(--accent-danger) text-sm mt-1">{formError}</p>}
               </div>
 
               <div>
@@ -87,7 +87,7 @@ export function LoginForm() {
                   errorMessage={errors.password?.message}
                 />
                 {formError && (
-                  <p className="text-red-400 text-sm">{formError}</p>
+                  <p className="text-(--accent-danger) text-sm mt-1">{formError}</p>
                 )}
               </div>
             </div>
@@ -103,7 +103,7 @@ export function LoginForm() {
               type="submit"
               isLoading={isSubmitting}
               disabled={isSubmitting}
-              className="mt-3 cursor-pointer w-full bg-(--accent-primary) hover:bg-(--accent-hover) text-(--text-primary) font-medium py-3 px-4 h-10 text-base transition-colors"
+              className="mt-3 cursor-pointer w-full"
             >
               {isSubmitting ? "Logging In..." : "Log In"}
             </PrimaryButton>
