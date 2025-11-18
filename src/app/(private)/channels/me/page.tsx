@@ -1,12 +1,9 @@
-import DmBar from '@/components/layout/Dmbar'
-import React from 'react'
+"use client";
+import React from "react";
+import FriendsPage from "@/components/channels/FriendsPage";
 
-function page() {
-  return (
-    <div className='h-full'>
-      <DmBar />
-    </div>
-  )
+export default function MePage() {
+  console.log("me page rendered");
+  
+  return <FriendsPage />;
 }
-
-export default page

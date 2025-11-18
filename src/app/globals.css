@@ -78,7 +78,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-family);
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -157,4 +157,6 @@ body {
 .auth-form-animation {
   animation: fade-in 0.3s ease-in-out;
 }
+
+
 

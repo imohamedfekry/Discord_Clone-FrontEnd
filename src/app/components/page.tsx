@@ -8,6 +8,8 @@ import { SelectInput } from "../../components/ui/select-input";
 import Tooltip from "../../components/ui/Tooltip";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
+import UserPanel from "@/components/layout/UserPanel";
+import MessageInput from "@/components/chat/MessageInput";
 
 export default function Page() {
   const [checked, setChecked] = useState(false);
@@ -119,6 +121,12 @@ export default function Page() {
         <Tooltip side="right" text="Tooltip: اضغط هنا لمزيد">
           <Button onClick={() => {}}>Hover me</Button>
         </Tooltip>
+      </section>
+
+
+      <section className="flex flex-col">
+        <MessageInput  channelId={"1"} type="channel" placeholder={`Message #channel`} />
+        <UserPanel />
       </section>
     </div>
   );

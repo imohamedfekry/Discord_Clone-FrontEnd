@@ -10,16 +10,23 @@ interface BadgeProps {
   border?: boolean;
 }
 
-export const Badge = ({ count, label, icon: Icon, color = "red", size = "md" , border}: BadgeProps) => {
+export const Badge = ({
+  count,
+  label,
+  icon: Icon,
+  color = "red",
+  size = "md",
+  border,
+}: BadgeProps) => {
   // Check if it's count-only (number badge) for perfect circle
   const isCountOnly = count !== undefined && !label && !Icon;
-  
+
   const baseClasses = clsx(
-    "items-center justify-center font-black text-center inline-flex",
+    "items-center justify-center font-bold  text-center inline-flex",
     "rounded-full leading-none",
     border && "border-2 border-[var(--background-base-lowest)]",
     // Size styles - use equal padding and min dimensions for perfect circle
-    size === "sm" 
+    size === "sm"
       ? clsx(
           "text-xs",
           isCountOnly ? "min-w-[18px] min-h-[18px] px-0" : "px-1.5 py-0.5"
@@ -33,21 +40,24 @@ export const Badge = ({ count, label, icon: Icon, color = "red", size = "md" , b
     color === "gray" && "bg-[var(--text-tertiary)] text-white",
     color === "green" && "bg-[var(--status-success)] text-white",
     color === "brand" && "bg-[var(--bg-brand)] text-white",
-    !["red", "gray", "green", "brand"].includes(color) && `bg-${color}-500 text-white`
+    !["red", "gray", "green", "brand"].includes(color) &&
+      `bg-${color}-500 text-white`
   );
 
   return (
     <span className={baseClasses}>
-      {Icon && (
-        <span className="flex items-center justify-center mr-1 w-4 h-4">
-          {Icon}
-        </span>
-      )}
-      {label ?? count}
+        {Icon && (
+          <span className="flex items-center justify-center mr-1 w-4 h-4">
+            {Icon}
+          </span>
+        )}
+        {label ?? count}
     </span>
   );
 };
-// 
-{/* <Badge count={5} color="red" />          // notification
+//
+{
+  /* <Badge count={5} color="red" />          // notification
 <Badge label="New" color="gray" />       // label
-<Badge icon={Star} label="Pro" color="green" /> // role badge */}
+<Badge icon={Star} label="Pro" color="green" /> // role badge */
+}

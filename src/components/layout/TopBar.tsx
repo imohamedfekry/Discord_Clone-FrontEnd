@@ -1,24 +1,117 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import clsx from "clsx";
 
 export default function TopBar() {
+  const pathname = usePathname();
+  const router = useRouter();
 
+  const [canGoBack, setCanGoBack] = useState(false);
+  const [canGoForward, setCanGoForward] = useState(false);
+
+  // Track navigation
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let historyStack = JSON.parse(sessionStorage.getItem("app-history") || "[]");
+    let forwardStack = JSON.parse(sessionStorage.getItem("app-forward") || "[]");
+
+    const last = historyStack[historyStack.length - 1];
+
+    // If navigating to a new path → push to history
+    if (last !== pathname) {
+      historyStack.push(pathname);
+      sessionStorage.setItem("app-history", JSON.stringify(historyStack));
+      // New page → forward stack cleared
+      sessionStorage.setItem("app-forward", JSON.stringify([]));
+      forwardStack = [];
+    }
+
+    setCanGoBack(historyStack.length > 1);
+    setCanGoForward(forwardStack.length > 0);
+  }, [pathname]);
+
+  const handleBack = () => {
+    let historyStack = JSON.parse(sessionStorage.getItem("app-history") || "[]");
+    let forwardStack = JSON.parse(sessionStorage.getItem("app-forward") || "[]");
+
+    if (historyStack.length > 1) {
+      const current = historyStack.pop();       // Remove current page
+      forwardStack.push(current);               // Add to forward stack
+
+      const previous = historyStack[historyStack.length - 1];
+
+      sessionStorage.setItem("app-history", JSON.stringify(historyStack));
+      sessionStorage.setItem("app-forward", JSON.stringify(forwardStack));
+
+      router.push(previous);
+    }
+  };
+
+  const handleForward = () => {
+    let historyStack = JSON.parse(sessionStorage.getItem("app-history") || "[]");
+    let forwardStack = JSON.parse(sessionStorage.getItem("app-forward") || "[]");
+
+    if (forwardStack.length > 0) {
+      const next = forwardStack.pop();     // Get next page
+
+      historyStack.push(next);
+
+      sessionStorage.setItem("app-history", JSON.stringify(historyStack));
+      sessionStorage.setItem("app-forward", JSON.stringify(forwardStack));
+
+      router.push(next);
+    }
+  };
+
+  // Dynamic title like Discord
+  const getTitle = () => {
+    if (pathname?.startsWith("/channels/@me/") || pathname?.startsWith("/channels/@me/")) {
+      const dmId = pathname.includes("/channels/@me/")
+        ? pathname.split("/channels/@me/")[1]
+        : pathname.split("/channels/@me/")[1];
+      return `DM with User ${dmId}`;
+    }
+    if (pathname === "/channels/@me" || pathname === "/channels/@me") {
+      return "Friends";
+    }
+    if (pathname?.startsWith("/channels/")) {
+      return "Server Channel";
+    }
+    return "Discord";
+  };
 
   return (
-    <header className="flex items-center justify-between bg-(--background-base-lowest) shadow-md shrink-0 ">
-      {/* Left - Navigation */}
-      <div className="flex items-center gap-3"> 
-        <button 
-          className="text-(--text-secondary) hover:text-(--text-primary) transition-colors p-1.5 rounded hover:bg-(--background-secondary)"
+    <header className="h-12 flex items-center justify-between bg-(--background-base-lowest)  shrink-0 px-4">
+      {/* Left Nav */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleBack}
+          disabled={!canGoBack}
+          className={clsx(
+            "transition-colors p-1.5 rounded",
+            canGoBack
+              ? "text-(--text-primary) hover:bg-(--background-secondary) cursor-pointer"
+              : "text-(--text-tertiary) cursor-not-allowed opacity-50"
+          )}
           aria-label="Back"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
             <path d="M3.3 11.3a1 1 0 0 0 0 1.4l5 5a1 1 0 0 0 1.4-1.4L6.42 13H20a1 1 0 1 0 0-2H6.41l3.3-3.3a1 1 0 0 0-1.42-1.4l-5 5Z" />
           </svg>
         </button>
-        <button 
-          className="text-(--text-secondary) hover:text-(--text-primary) transition-colors p-1.5 rounded hover:bg-(--background-secondary)"
+
+        <button
+          onClick={handleForward}
+          disabled={!canGoForward}
+          className={clsx(
+            "transition-colors p-1.5 rounded",
+            canGoForward
+              ? "text-(--text-primary) hover:bg-(--background-secondary) cursor-pointer"
+              : "text-(--text-tertiary) cursor-not-allowed opacity-50"
+          )}
           aria-label="Forward"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
@@ -28,14 +121,14 @@ export default function TopBar() {
       </div>
 
       {/* Middle - Title */}
-      <div className="flex-1 text-left ml-6">
-        <h1 className="text-(--text-primary) text-[15px] font-semibold text-center">
-         test title
-        </h1>
+      <div className="flex-1 text-left ml-4">
+        <h1 className="text-(--text-primary) text-[15px] text-center font-semibold">{getTitle()}</h1>
       </div>
 
-      {/* Right - Actions */}
-
+      {/* Right side (actions) */}
+      <div className="flex items-center gap-2">
+        {/* Add actions here later */}
+      </div>
     </header>
   );
 }
