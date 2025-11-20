@@ -3,10 +3,12 @@
 import React from "react";
 import { useParams } from "next/navigation";
 import clsx from "clsx";
+import { useResizableSidebar } from "../hooks/useResizableSidebar";
 
 export default function ChannelsList() {
   const params = useParams();
   const serverId = params?.id as string;
+  const { width, isResizing, startResizing } = useResizableSidebar();
 
   // Mock channels data
   const channels = [
@@ -15,8 +17,41 @@ export default function ChannelsList() {
     { id: "3", name: "voice-chat", type: "voice" },
   ];
 
+  if (width === null) {
+    return null;
+  }
+
   return (
-    <aside className="w-60 bg-(--background-base-low) flex flex-col h-full border-r border-(--border-normal)">
+    <aside
+      className={clsx(
+        "bg-(--background-base-low) flex flex-col h-full border-r border-(--border-normal) relative overflow-hidden flex-none",
+        isResizing && "select-none"
+      )}
+      style={{
+        width: `${width}px`,
+        cursor: isResizing ? "col-resize" : "default",
+      }}
+    >
+      {/* Resize handle */}
+      <div
+        className={clsx(
+          "absolute top-0 right-0 w-0.5 h-full cursor-ew-resize transition-colors z-10",
+          isResizing
+            ? "bg-(--background-secondary-alt)/90"
+            : "bg-transparent hover:bg-(--background-secondary-alt)/90"
+        )}
+        onMouseDown={startResizing}
+        title="Drag to resize"
+      >
+        <div className="absolute inset-y-0 -right-2 w-1" />
+      </div>
+
+      {isResizing && (
+        <div
+          className="fixed inset-0 z-50 cursor-ew-resize"
+          style={{ pointerEvents: "all" }}
+        />
+      )}
       {/* Server Header */}
       <div className="h-12 px-4 flex items-center border-b border-(--border-normal) shadow-sm">
         <h2 className="text-base font-semibold text-(--text-primary) truncate">

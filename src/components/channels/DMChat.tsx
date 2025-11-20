@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { useParams } from "next/navigation";
 import MessageList from "@/components/chat/MessageList";
 import MessageInput from "@/components/chat/MessageInput";
 
@@ -16,10 +15,13 @@ export default function DMChat({ dmId }: DMChatProps) {
       <div className="flex-1 overflow-y-auto">
         <MessageList channelId={dmId} type="dm" />
       </div>
-      
-      {/* Input Area - Same height as UserPanel */}
-        <MessageInput channelId={dmId} type="dm" placeholder={`Message @user`} />
+
+      {/* Input Area */}
+        <MessageInput
+          channelId={dmId}
+          type="dm"
+          placeholder={`Message @user`}
+        />
     </div>
   );
 }
-

@@ -3,9 +3,9 @@ This digest is designed to be easily parsed by Large Language Models.
 
 --- SUMMARY ---
 Repository: front
-Files Analyzed: 75
-Total Text Size: 199.65 KB
-Estimated Tokens (text only): ~76,216
+Files Analyzed: 79
+Total Text Size: 230.43 KB
+Estimated Tokens (text only): ~85,958
 
 --- DIRECTORY STRUCTURE ---
 front/
@@ -56,7 +56,8 @@ front/
 │   │   │   └── RegisterForm.tsx
 │   │   ├── channels/
 │   │   │   ├── DMChat.tsx
-│   │   │   └── FriendsPage.tsx
+│   │   │   ├── FriendsPage.tsx
+│   │   │   └── ServerChannel.tsx
 │   │   ├── chat/
 │   │   │   ├── Message.tsx
 │   │   │   ├── MessageInput.tsx
@@ -64,11 +65,23 @@ front/
 │   │   ├── hooks/
 │   │   │   ├── useAuth.ts [binary]
 │   │   │   ├── useMessages.ts [binary]
+│   │   │   ├── useRouteDetection.ts [binary]
 │   │   │   └── useServers.ts [binary]
 │   │   ├── layout/
+│   │   │   ├── ContentTopBar/
+│   │   │   │   ├── ContentTopBar.tsx
+│   │   │   │   ├── TopBarDM.tsx
+│   │   │   │   ├── TopBarFriends.tsx
+│   │   │   │   └── TopBarServer.tsx
+│   │   │   ├── RightPanels/
+│   │   │   │   ├── DmUserProfile.tsx
+│   │   │   │   └── MemberList.tsx
+│   │   │   ├── ApplicationTopBar.tsx
 │   │   │   ├── ChannelsList.tsx
 │   │   │   ├── Dmbar.tsx
+│   │   │   ├── MainContentArea.tsx
 │   │   │   ├── ServersBar.tsx
+│   │   │   ├── SidebarContainer.tsx
 │   │   │   ├── TopBar.tsx
 │   │   │   └── UserPanel.tsx
 │   │   ├── store/
@@ -77,15 +90,6 @@ front/
 │   │   ├── types/
 │   │   │   └── user.ts [binary]
 │   │   ├── ui/
-│   │   │   ├── ContentTopBar/
-│   │   │   │   ├── ContentTopBar.tsx
-│   │   │   │   ├── TopBarDM.tsx
-│   │   │   │   ├── TopBarFriends.tsx
-│   │   │   │   ├── TopBarLayout.tsx
-│   │   │   │   └── TopBarServer.tsx
-│   │   │   ├── parts/
-│   │   │   │   ├── ActionButton.tsx
-│   │   │   │   └── Avatar.tsx
 │   │   │   ├── Badge.tsx
 │   │   │   ├── Button.tsx
 │   │   │   ├── custom-checkbox.tsx
@@ -120,31 +124,25 @@ front/
 FILE: src/app/(private)/channels/[id]/[channelId]/page.tsx
 ============================================================
 "use client";
+
 import React from "react";
 import { useParams } from "next/navigation";
-import MessageList from "@/components/chat/MessageList";
-import MessageInput from "@/components/chat/MessageInput";
+import ServerChannel from "@/components/channels/ServerChannel";
 
 export default function ServerChannelPage() {
   const params = useParams();
   const serverId = params?.id as string;
   const channelId = params?.channelId as string;
 
-  return (
-    // <div className="flex-1 flex flex-col h-full bg-(--background-base-lowest)">
-    //   {/* Messages Area */}
-    //   <div className="flex-1 overflow-y-auto">
-    //     <MessageList channelId={channelId} type="channel" />
-    //   </div>
-      
-    //   {/* Input Area */}
-    //     <MessageInput channelId={channelId} type="channel" placeholder={`Message #channel`} />
-    // </div>
-    <>
-    
-    <h1>ServerChannelPage</h1>
-    </>
-  );
+  if (!serverId || !channelId) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-(--text-secondary)">Loading...</div>
+      </div>
+    );
+  }
+
+  return <ServerChannel serverId={serverId} channelId={channelId} />;
 }
 
 
@@ -184,68 +182,37 @@ export default function MePage() {
 FILE: src/app/(private)/channels/layout.tsx
 ============================================================
 "use client";
-import ServersBar from "@/components/layout/ServersBar";
-import TopBar from "@/components/layout/TopBar";
-import UserPanel from "@/components/layout/UserPanel";
-import DmBar from "@/components/layout/Dmbar";
-import ChannelsList from "@/components/layout/ChannelsList";
-import ContentTopBar from "@/components/ui/ContentTopBar/ContentTopBar";
-import DmUserProfile from "@/components/ui/user.profile";
+
 import React, { ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import ApplicationTopBar from "@/components/layout/ApplicationTopBar";
+import ServersBar from "@/components/layout/ServersBar";
+import SidebarContainer from "@/components/layout/SidebarContainer";
+import MainContentArea from "@/components/layout/MainContentArea";
+import UserPanel from "@/components/layout/UserPanel";
 
 interface ChannelsLayoutProps {
   children: ReactNode;
 }
 
 export default function ChannelsLayout({ children }: ChannelsLayoutProps) {
-  const pathname = usePathname() || "";
-
-  const parts = pathname.split("/").filter(Boolean);
-
-  const isFriends = pathname === "/channels/@me";
-  const isDM = parts.length === 3 && parts[0] === "channels" && parts[1] === "@me";
-  const isServer =
-    parts[0] === "channels" && !isDM && !isFriends && parts.length >= 3;
-
-  const dmId = isDM ? parts[2] : null;
-
   return (
-    <div className="flex flex-col h-screen w-screen bg-(--background-base-lowest) text-(--text-primary)">
-      
-      {/* Application TopBar */}
-      <TopBar />
+    <div className="flex flex-col h-screen w-screen bg-(--background-base-lowest) text-(--text-primary) overflow-hidden">
+      {/* Application TopBar (Global Navigation) */}
+      <ApplicationTopBar />
 
+      {/* Main Layout Container */}
       <div className="flex flex-1 overflow-hidden">
+        {/* Column 1: Servers Bar */}
         <ServersBar />
 
-        {(isDM || isFriends) && <DmBar />}
-        {isServer && <ChannelsList />}
+        {/* Column 2: Sidebar (DmBar or ChannelsList) */}
+        <SidebarContainer />
 
-        {/* Main */}
-        <main className="flex-1 flex overflow-hidden flex-col">
-          
-          {/* >>> Content Top Bar (the important one) <<< */}
-          <ContentTopBar
-            isDM={isDM}
-            isFriends={isFriends}
-            isServer={isServer}
-            dmId={dmId}
-          />
-
-          <div className="flex-1 overflow-hidden">
-            {children}
-          </div>
-
-          {/* DM Profile (Right Panel) */}
-          {isDM && dmId && (
-            <aside className="w-[300px] border-l border-(--border-primary)">
-              <DmUserProfile dmId={dmId} />
-            </aside>
-          )}
-        </main>
+        {/* Column 3: Main Content Area */}
+        <MainContentArea>{children}</MainContentArea>
       </div>
 
+      {/* Bottom Panel: UserPanel */}
       <UserPanel />
     </div>
   );
@@ -1596,7 +1563,6 @@ FILE: src/components/channels/DMChat.tsx
 "use client";
 
 import React from "react";
-import { useParams } from "next/navigation";
 import MessageList from "@/components/chat/MessageList";
 import MessageInput from "@/components/chat/MessageInput";
 
@@ -1611,13 +1577,16 @@ export default function DMChat({ dmId }: DMChatProps) {
       <div className="flex-1 overflow-y-auto">
         <MessageList channelId={dmId} type="dm" />
       </div>
-      
-      {/* Input Area - Same height as UserPanel */}
-        <MessageInput channelId={dmId} type="dm" placeholder={`Message @user`} />
+
+      {/* Input Area */}
+        <MessageInput
+          channelId={dmId}
+          type="dm"
+          placeholder={`Message @user`}
+        />
     </div>
   );
 }
-
 
 
 ============================================================
@@ -1629,21 +1598,75 @@ import React from "react";
 
 export default function FriendsPage() {
   return (
-    <div className="flex-1 flex flex-col h-full bg-(--background-base-lowest)">
+    <div className="flex-1 flex flex-col h-full bg-(--background-secondary)">
       <div className="flex-1 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-2xl font-semibold text-(--text-primary) mb-2">
+        <div className="text-center max-w-md px-4">
+          <div className="mb-4">
+            <svg
+              className="w-32 h-32 mx-auto text-(--text-tertiary)"
+              viewBox="0 0 200 200"
+              fill="currentColor"
+            >
+              <path d="M100 0C44.8 0 0 44.8 0 100s44.8 100 100 100 100-44.8 100-100S155.2 0 100 0zm0 180c-44.1 0-80-35.9-80-80S55.9 20 100 20s80 35.9 80 80-35.9 80-80 80z" />
+              <circle cx="70" cy="70" r="12" />
+              <circle cx="130" cy="70" r="12" />
+              <path d="M100 120c-20 0-35-10-40-20h80c-5 10-20 20-40 20z" />
+            </svg>
+          </div>
+          <h2 className="text-[22px] font-semibold text-(--text-primary) mb-2">
             Wumpus is waiting on friends.
-          </div>
-          <div className="text-sm text-(--text-secondary)">
-            No one's around to play with Wumpus.
-          </div>
+          </h2>
+          <p className="text-sm text-(--text-secondary) leading-relaxed">
+            No one's around to play with Wumpus. You can add friends with their Discord username.
+          </p>
         </div>
       </div>
     </div>
   );
 }
 
+
+============================================================
+FILE: src/components/channels/ServerChannel.tsx
+============================================================
+"use client";
+
+import React from "react";
+import MessageList from "@/components/chat/MessageList";
+import MessageInput from "@/components/chat/MessageInput";
+
+interface ServerChannelProps {
+  serverId: string;
+  channelId: string;
+}
+
+export default function ServerChannel({
+  serverId,
+  channelId,
+}: ServerChannelProps) {
+  // Mock channel data - replace with real data later
+  const channel = {
+    id: channelId,
+    name: "general",
+    type: "text",
+  };
+
+  return (
+    <div className="flex-1 flex flex-col h-full bg-(--background-secondary)">
+      {/* Messages Area */}
+      <div className="flex-1 overflow-y-auto">
+        <MessageList channelId={channelId} type="channel" />
+      </div>
+
+      {/* Input Area */}
+        <MessageInput
+          channelId={channelId}
+          type="channel"
+          placeholder={`Message #${channel.name}`}
+        />
+    </div>
+  );
+}
 
 
 ============================================================
@@ -1755,6 +1778,909 @@ export default function MessageList({ channelId, type }: MessageListProps) {
   );
 }
 
+
+
+============================================================
+FILE: src/components/layout/ContentTopBar/ContentTopBar.tsx
+============================================================
+"use client";
+
+import React from "react";
+import TopBarServer from "./TopBarServer";
+import TopBarFriends from "./TopBarFriends";
+import TopBarDM from "./TopBarDM";
+
+interface ContentTopBarProps {
+  isDM: boolean;
+  isFriends: boolean;
+  isServer: boolean;
+  dmId?: string | null;
+  serverId?: string | null;
+  channelId?: string | null;
+  showDmProfile?: boolean;
+  onToggleDmProfile?: () => void;
+}
+
+export default function ContentTopBar({
+  isDM,
+  isFriends,
+  isServer,
+  dmId,
+  serverId,
+  channelId,
+  showDmProfile,
+  onToggleDmProfile,
+}: ContentTopBarProps) {
+  if (isFriends) {
+    return <TopBarFriends />;
+  }
+
+  if (isDM && dmId) {
+    return (
+      <TopBarDM
+        dmId={dmId}
+        showDmProfile={showDmProfile}
+        onToggleDmProfile={onToggleDmProfile}
+      />
+    );
+  }
+
+  if (isServer && serverId && channelId) {
+    return <TopBarServer serverId={serverId} channelId={channelId} />;
+  }
+
+  return null;
+}
+
+
+============================================================
+FILE: src/components/layout/ContentTopBar/TopBarDM.tsx
+============================================================
+"use client";
+
+import React, { useState } from "react";
+import clsx from "clsx";
+
+interface TopBarDMProps {
+  dmId: string;
+  showDmProfile?: boolean;
+  onToggleDmProfile?: () => void;
+}
+
+export default function TopBarDM({
+  dmId,
+  showDmProfile = true,
+  onToggleDmProfile,
+}: TopBarDMProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Mock user data - replace with real data later
+  const user = {
+    id: dmId,
+    username: "/Bk",
+    avatar: "https://cdn.discordapp.com/embed/avatars/1.png",
+    status: "offline",
+  };
+
+  return (
+    <div className="h-[50px] border-b border-t border-(--border-normal) flex items-center justify-between px-4 bg-(--background-secondary) ">
+      {/* Left: User Info */}
+      <div className="flex items-center gap-2 min-w-0 flex-1">
+        {/* Avatar with Status - 20px size like Discord */}
+        <div className="relative shrink-0 cursor-pointer" role="button" tabIndex={0}>
+          <div className="w-5 h-5 relative">
+            <img
+              src={user.avatar}
+              alt={user.username}
+              className="w-5 h-5 rounded-full object-cover"
+            />
+            {/* Status Indicator - 6x6 like Discord */}
+            <span
+              className={clsx(
+                "absolute bottom-0 right-0 w-1.5 h-1.5 rounded-full",
+                user.status === "online" && "bg-(--status-online)",
+                user.status === "idle" && "bg-(--status-idle)",
+                user.status === "dnd" && "bg-(--status-dnd)",
+                user.status === "offline" && "bg-(--status-offline)"
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Username */}
+        <h1 className="font-medium text-[16px] text-(--text-primary) truncate cursor-pointer hover:underline">
+          {user.username}
+        </h1>
+      </div>
+
+      {/* Right: Toolbar with Icons and Search */}
+      <div className="flex items-center gap-0 shrink-0">
+        {/* Call Button */}
+        <button
+          className="p-2 rounded hover:bg-(--background-secondary) text-(--text-secondary) hover:text-(--text-primary) transition-colors"
+          aria-label="Start Voice Call"
+          title="Start Voice Call"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill="currentColor"
+              d="M2 7.4A5.4 5.4 0 0 1 7.4 2c.36 0 .7.22.83.55l1.93 4.64a1 1 0 0 1-.43 1.25L7 10a8.52 8.52 0 0 0 7 7l1.12-2.24a1 1 0 0 1 1.19-.51l5.06 1.56c.38.11.63.46.63.85C22 19.6 19.6 22 16.66 22h-.37C8.39 22 2 15.6 2 7.71V7.4ZM13 3a1 1 0 0 1 1-1 8 8 0 0 1 8 8 1 1 0 1 1-2 0 6 6 0 0 0-6-6 1 1 0 0 1-1-1Z"
+            />
+            <path
+              fill="currentColor"
+              d="M13 7a1 1 0 0 1 1-1 4 4 0 0 1 4 4 1 1 0 1 1-2 0 2 2 0 0 0-2-2 1 1 0 0 1-1-1Z"
+            />
+          </svg>
+        </button>
+
+        {/* Video Call Button */}
+        <button
+          className="p-2 rounded hover:bg-(--background-secondary) text-(--text-secondary) hover:text-(--text-primary) transition-colors"
+          aria-label="Start Video Call"
+          title="Start Video Call"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill="currentColor"
+              d="M4 4a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h11a3 3 0 0 0 3-3v-2.12a1 1 0 0 0 .55.9l3 1.5a1 1 0 0 0 1.45-.9V7.62a1 1 0 0 0-1.45-.9l-3 1.5a1 1 0 0 0-.55.9V7a3 3 0 0 0-3-3H4Z"
+            />
+          </svg>
+        </button>
+
+        {/* Pin Button */}
+        <button
+          className="p-2 rounded hover:bg-(--background-secondary) text-(--text-secondary) hover:text-(--text-primary) transition-colors"
+          aria-label="Pinned Messages"
+          title="Pinned Messages"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill="currentColor"
+              d="M19.38 11.38a3 3 0 0 0 4.24 0l.03-.03a.5.5 0 0 0 0-.7L13.35.35a.5.5 0 0 0-.7 0l-.03.03a3 3 0 0 0 0 4.24L13 5l-2.92 2.92-3.65-.34a2 2 0 0 0-1.6.58l-.62.63a1 1 0 0 0 0 1.42l9.58 9.58a1 1 0 0 0 1.42 0l.63-.63a2 2 0 0 0 .58-1.6l-.34-3.64L19 11l.38.38ZM9.07 17.07a.5.5 0 0 1-.08.77l-5.15 3.43a.5.5 0 0 1-.63-.06l-.42-.42a.5.5 0 0 1-.06-.63L6.16 15a.5.5 0 0 1 .77-.08l2.14 2.14Z"
+            />
+          </svg>
+        </button>
+
+        {/* Add Friends to DM Button */}
+        <button
+          className="p-2 rounded hover:bg-(--background-secondary) text-(--text-secondary) hover:text-(--text-primary) transition-colors"
+          aria-label="Add Friends to DM"
+          title="Add Friends to DM"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill="currentColor"
+              d="M14.5 8a3 3 0 1 0-2.7-4.3c-.2.4.06.86.44 1.12a5 5 0 0 1 2.14 3.08c.01.06.06.1.12.1ZM16.62 13.17c-.22.29-.65.37-.92.14-.34-.3-.7-.57-1.09-.82-.52-.33-.7-1.05-.47-1.63.11-.27.2-.57.26-.87.11-.54.55-1 1.1-.92 1.6.2 3.04.92 4.15 1.98.3.27-.25.95-.65.95a3 3 0 0 0-2.38 1.17ZM15.19 15.61c.13.16.02.39-.19.39a3 3 0 0 0-1.52 5.59c.2.12.26.41.02.41h-8a.5.5 0 0 1-.5-.5v-2.1c0-.25-.31-.33-.42-.1-.32.67-.67 1.58-.88 2.54a.2.2 0 0 1-.2.16A1.5 1.5 0 0 1 2 20.5a7.5 7.5 0 0 1 13.19-4.89ZM9.5 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM15.5 22Z"
+            />
+            <path
+              fill="currentColor"
+              d="M19 14a1 1 0 0 1 1 1v3h3a1 1 0 0 1 0 2h-3v3a1 1 0 0 1-2 0v-3h-3a1 1 0 1 1 0-2h3v-3a1 1 0 0 1 1-1Z"
+            />
+          </svg>
+        </button>
+
+        {/* User Profile Toggle Button */}
+        <button
+          onClick={onToggleDmProfile}
+          className={clsx(
+            "p-2 rounded transition-colors",
+            showDmProfile
+              ? "bg-(--background-secondary) text-(--text-primary)"
+              : "hover:bg-(--background-secondary) text-(--text-secondary) hover:text-(--text-primary)"
+          )}
+          aria-label={showDmProfile ? "Hide User Profile" : "Show User Profile"}
+          title={showDmProfile ? "Hide User Profile" : "Show User Profile"}
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill="currentColor"
+              fillRule="evenodd"
+              d="M23 12.38c-.02.38-.45.58-.78.4a6.97 6.97 0 0 0-6.27-.08.54.54 0 0 1-.44 0 8.97 8.97 0 0 0-11.16 3.55c-.1.15-.1.35 0 .5.37.58.8 1.13 1.28 1.61.24.24.64.15.8-.15.19-.38.39-.73.58-1.02.14-.21.43-.1.4.15l-.19 1.96c-.02.19.07.37.23.47A8.96 8.96 0 0 0 12 21a.4.4 0 0 1 .38.27c.1.33.25.65.4.95.18.34-.02.76-.4.77L12 23a11 11 0 1 1 11-10.62ZM15.5 7.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+              clipRule="evenodd"
+            />
+            <path fill="currentColor" d="M24 19a5 5 0 1 1-10 0 5 5 0 0 1 10 0Z" />
+          </svg>
+        </button>
+
+        {/* Search Bar - Like Discord */}
+        <div className="ml-2 relative">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-[144px] h-[24px] px-2 pr-8 bg-(--background-secondary) border border-(--border-normal) rounded text-sm text-(--text-primary) placeholder-(--text-placeholder) focus:outline-none focus:ring-1 focus:ring-(--accent-primary)"
+            />
+            {searchQuery ? (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-(--background-secondary-alt) text-(--text-secondary) hover:text-(--text-primary) transition-colors"
+                aria-label="Clear"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M17.3 18.7a1 1 0 0 0 1.4-1.4L13.42 12l5.3-5.3a1 1 0 0 0-1.42-1.4L12 10.58l-5.3-5.3a1 1 0 0 0-1.4 1.42L10.58 12l-5.3 5.3a1 1 0 1 0 1.42 1.4L12 13.42l5.3 5.3Z"
+                  />
+                </svg>
+              </button>
+            ) : (
+              <svg
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-secondary) pointer-events-none"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill="currentColor"
+                  fillRule="evenodd"
+                  d="M15.62 17.03a9 9 0 1 1 1.41-1.41l4.68 4.67a1 1 0 0 1-1.42 1.42l-4.67-4.68ZM17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+============================================================
+FILE: src/components/layout/ContentTopBar/TopBarFriends.tsx
+============================================================
+"use client";
+
+import React, { useState } from "react";
+import clsx from "clsx";
+
+type FriendsTab = "all" | "online" | "pending" | "blocked";
+
+export default function TopBarFriends() {
+  const [activeTab, setActiveTab] = useState<FriendsTab>("all");
+
+  const tabs: { id: FriendsTab; label: string }[] = [
+    { id: "all", label: "Friends" },
+    { id: "online", label: "Online" },
+    { id: "pending", label: "Pending" },
+    { id: "blocked", label: "Blocked" },
+  ];
+
+  return (
+    <div className="h-[50px] border-b border-t border-(--border-normal) flex items-center justify-between px-4 bg-(--background-secondary) ">
+      {/* Left: Tabs */}
+      <div className="flex items-center gap-8">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={clsx(
+              "text-sm font-medium transition-colors px-1 py-1 relative",
+              activeTab === tab.id
+                ? "text-(--text-primary)"
+                : "text-(--text-secondary) hover:text-(--text-primary)"
+            )}
+          >
+            {tab.label}
+            {activeTab === tab.id && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-(--accent-primary)" />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Right: Add Friend Button */}
+      <button
+        className="ml-auto bg-(--accent-primary) hover:bg-(--accent-primary-hover) px-4 py-1.5 rounded text-sm font-medium text-white transition-colors"
+        aria-label="Add Friend"
+      >
+        Add Friend
+      </button>
+    </div>
+  );
+}
+
+
+============================================================
+FILE: src/components/layout/ContentTopBar/TopBarServer.tsx
+============================================================
+"use client";
+
+import React, { useState } from "react";
+import clsx from "clsx";
+
+interface TopBarServerProps {
+  serverId: string;
+  channelId: string;
+}
+
+export default function TopBarServer({ serverId, channelId }: TopBarServerProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Mock channel data - replace with real data later
+  const channel = {
+    id: channelId,
+    name: "general",
+    type: "text",
+  };
+
+  return (
+    <div className="h-[50px] border-b border-t border-(--border-normal) flex items-center justify-between px-4 bg-(--background-secondary) ">
+      {/* Left: Channel Name */}
+      <div className="flex items-center gap-2 min-w-0 flex-1">
+        {/* Hash Icon for Text Channel */}
+        {channel.type === "text" && (
+          <svg
+            className="w-5 h-5 text-(--text-secondary) shrink-0"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path d="M5.88657 21C5.57547 21 5.3399 20.7189 5.39427 20.4126L6.00001 17H2.59511C2.28449 17 2.04905 16.7198 2.10259 16.4138L2.27759 15.4138C2.31946 15.1746 2.52722 15 2.77011 15H6.35001L7.41001 9H4.00511C3.69449 9 3.45905 8.71977 3.51259 8.41381L3.68759 7.41381C3.72946 7.17456 3.93722 7 4.18011 7H7.76001L8.39677 3.41262C8.43914 3.17391 8.64664 3 8.88907 3H9.87344C10.1845 3 10.4201 3.28107 10.3657 3.58738L9.76001 7H15.76L16.3968 3.41262C16.4391 3.17391 16.6466 3 16.8891 3H17.8734C18.1845 3 18.4201 3.28107 18.3657 3.58738L17.76 7H21.1649C21.4755 7 21.711 7.28023 21.6574 7.58619L21.4824 8.58619C21.4406 8.82544 21.2328 9 20.9899 9H17.41L16.35 15H19.7549C20.0655 15 20.301 15.2802 20.2474 15.5862L20.0724 16.5862C20.0306 16.8254 19.8228 17 19.5799 17H16L15.3632 20.5874C15.3209 20.8261 15.1134 21 14.8709 21H13.8866C13.5755 21 13.3399 20.7189 13.3943 20.4126L14 17H8.00001L7.36325 20.5874C7.32088 20.8261 7.11337 21 6.87094 21H5.88657ZM9.41045 15L8.35045 9H14.3505L15.4105 15H9.41045Z" />
+          </svg>
+        )}
+
+        {/* Voice Icon for Voice Channel */}
+        {channel.type === "voice" && (
+          <svg
+            className="w-5 h-5 text-(--text-secondary) shrink-0"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path d="M12 3C10.34 3 9 4.34 9 6V12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12V6C15 4.34 13.66 3 12 3ZM19 10V12C19 15.87 15.87 19 12 19C8.13 19 5 15.87 5 12V10H3V12C3 16.97 7.03 21 12 21C16.97 21 21 16.97 21 12V10H19Z" />
+          </svg>
+        )}
+
+        <h1 className="font-medium text-[16px] text-(--text-primary) truncate">
+          {channel.name}
+        </h1>
+      </div>
+
+      {/* Right: Search Bar & Actions */}
+      <div className="flex items-center gap-2 shrink-0">
+        {/* Search Bar - Like Discord */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-[144px] h-[24px] px-2 pr-8 bg-(--background-secondary) border border-(--border-normal) rounded text-sm text-(--text-primary) placeholder-(--text-placeholder) focus:outline-none focus:ring-1 focus:ring-(--accent-primary)"
+          />
+          {searchQuery ? (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-(--background-secondary-alt) text-(--text-secondary) hover:text-(--text-primary) transition-colors"
+              aria-label="Clear"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill="currentColor"
+                  d="M17.3 18.7a1 1 0 0 0 1.4-1.4L13.42 12l5.3-5.3a1 1 0 0 0-1.42-1.4L12 10.58l-5.3-5.3a1 1 0 0 0-1.4 1.42L10.58 12l-5.3 5.3a1 1 0 1 0 1.42 1.4L12 13.42l5.3 5.3Z"
+                />
+              </svg>
+            </button>
+          ) : (
+            <svg
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-(--text-secondary) pointer-events-none"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill="currentColor"
+                fillRule="evenodd"
+                d="M15.62 17.03a9 9 0 1 1 1.41-1.41l4.68 4.67a1 1 0 0 1-1.42 1.42l-4.67-4.68ZM17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+                clipRule="evenodd"
+              />
+            </svg>
+          )}
+        </div>
+
+        {/* Inbox Button */}
+        <button
+          className="p-2 rounded hover:bg-(--background-secondary) text-(--text-secondary) hover:text-(--text-primary) transition-colors"
+          aria-label="Inbox"
+          title="Inbox"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill="currentColor"
+              d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 18H4V8L12 13L20 8V18ZM12 11L4 6H20L12 11Z"
+            />
+          </svg>
+        </button>
+
+        {/* Help Button */}
+        <button
+          className="p-2 rounded hover:bg-(--background-secondary) text-(--text-secondary) hover:text-(--text-primary) transition-colors"
+          aria-label="Help"
+          title="Help"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill="currentColor"
+              d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 19H11V17H13V19ZM15.07 11.25L14.17 12.17C13.45 12.9 13 13.5 13 15H11V14.5C11 13.67 11.45 12.9 12.17 12.17L13.1 11.25C13.45 10.9 13.67 10.5 13.67 10C13.67 9.17 13.17 8.67 12.33 8.67C11.5 8.67 11 9.17 11 10H9C9 8.33 10.17 7.17 11.83 7.17C13.5 7.17 14.67 8.33 14.67 10C14.67 10.88 14.25 11.75 15.07 11.25Z"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+============================================================
+FILE: src/components/layout/RightPanels/DmUserProfile.tsx
+============================================================
+"use client";
+
+import React from "react";
+import clsx from "clsx";
+
+interface DmUserProfileProps {
+  dmId: string;
+}
+
+export default function DmUserProfile({ dmId }: DmUserProfileProps) {
+  // Mock user data - replace with real data later
+  const user = {
+    id: dmId,
+    username: "John Doe",
+    discriminator: "0421",
+    avatar: "https://cdn.discordapp.com/embed/avatars/1.png",
+    bio: "This is a static bio for the user. You can replace it any time.",
+    status: "online",
+    mutualServers: 3,
+  };
+
+  return (
+    <div className="w-full h-full bg-(--background-base-lowest) flex flex-col">
+      {/* Profile Header */}
+      <div className="p-4 border-b border-(--border-normal)">
+        <div className="flex items-center gap-3">
+          {/* Avatar with Status */}
+          <div className="relative shrink-0">
+            <img
+              src={user.avatar}
+              alt={`${user.username} avatar`}
+              className="w-16 h-16 rounded-full object-cover"
+            />
+            {/* Status Indicator */}
+            <span
+              className={clsx(
+                "absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-(--background-base-lowest)",
+                user.status === "online" && "bg-(--status-online)",
+                user.status === "idle" && "bg-(--status-idle)",
+                user.status === "dnd" && "bg-(--status-dnd)",
+                user.status === "offline" && "bg-(--status-offline)"
+              )}
+            />
+          </div>
+
+          {/* Username */}
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold text-[16px] text-(--text-primary) truncate">
+              {user.username}
+            </div>
+            <div className="text-sm text-(--text-secondary) capitalize">
+              {user.status}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bio Section */}
+      <div className="p-4 border-b border-(--border-normal)">
+        <div className="text-[12px] uppercase text-(--text-tertiary) font-semibold mb-2 tracking-wide">
+          About
+        </div>
+        <div className="text-sm text-(--text-secondary) leading-relaxed">
+          {user.bio}
+        </div>
+      </div>
+
+      {/* Mutual Servers */}
+      {user.mutualServers > 0 && (
+        <div className="p-4 border-b border-(--border-normal)">
+          <div className="text-[12px] uppercase text-(--text-tertiary) font-semibold mb-2 tracking-wide">
+            Mutual Servers
+          </div>
+          <div className="text-sm text-(--text-primary)">
+            {user.mutualServers} server{user.mutualServers !== 1 ? "s" : ""}
+          </div>
+        </div>
+      )}
+
+      {/* Action Buttons */}
+      <div className="mt-auto p-4 space-y-2">
+        <button className="w-full h-9 px-4 rounded text-sm font-medium border border-(--border-normal) bg-(--background-secondary) hover:bg-(--background-secondary-alt) text-(--text-primary) transition-colors">
+          Message
+        </button>
+        <button className="w-full h-9 px-4 rounded text-sm font-medium bg-(--accent-primary) hover:bg-(--accent-primary-hover) text-white transition-colors">
+          Call
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+============================================================
+FILE: src/components/layout/RightPanels/MemberList.tsx
+============================================================
+"use client";
+
+import React, { useState } from "react";
+import clsx from "clsx";
+
+interface MemberListProps {
+  serverId: string;
+  channelId: string;
+}
+
+interface Member {
+  id: string;
+  username: string;
+  avatar: string;
+  status: "online" | "idle" | "dnd" | "offline";
+  role?: string;
+}
+
+export default function MemberList({ serverId, channelId }: MemberListProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Mock members data - replace with real data later
+  const members: Member[] = [
+    {
+      id: "1",
+      username: "Admin User",
+      avatar: "https://cdn.discordapp.com/embed/avatars/1.png",
+      status: "online",
+      role: "Admin",
+    },
+    {
+      id: "2",
+      username: "Moderator",
+      avatar: "https://cdn.discordapp.com/embed/avatars/2.png",
+      status: "idle",
+      role: "Moderator",
+    },
+    {
+      id: "3",
+      username: "Member 1",
+      avatar: "https://cdn.discordapp.com/embed/avatars/3.png",
+      status: "online",
+    },
+    {
+      id: "4",
+      username: "Member 2",
+      avatar: "https://cdn.discordapp.com/embed/avatars/4.png",
+      status: "dnd",
+    },
+    {
+      id: "5",
+      username: "Member 3",
+      avatar: "https://cdn.discordapp.com/embed/avatars/5.png",
+      status: "offline",
+    },
+  ];
+
+  // Group members by role
+  const groupedMembers = members.reduce(
+    (acc, member) => {
+      const role = member.role || "Members";
+      if (!acc[role]) {
+        acc[role] = [];
+      }
+      acc[role].push(member);
+      return acc;
+    },
+    {} as Record<string, Member[]>
+  );
+
+  const filteredMembers = searchQuery
+    ? members.filter((member) =>
+        member.username.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : members;
+
+  return (
+    <div className="w-full h-full bg-(--background-base-lowest) flex flex-col">
+      {/* Search Bar */}
+      <div className="px-3 py-2.5 border-b border-(--border-normal)">
+        <input
+          type="text"
+          placeholder="Search"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full h-7 px-2.5 bg-(--background-secondary) border border-(--border-normal) rounded text-sm text-(--text-primary) placeholder-(--text-placeholder) focus:outline-none focus:ring-1 focus:ring-(--accent-primary)"
+        />
+      </div>
+
+      {/* Members List */}
+      <div className="flex-1 overflow-y-auto px-2 py-2">
+        {!searchQuery ? (
+          // Grouped by role
+          Object.entries(groupedMembers).map(([role, roleMembers]) => (
+            <div key={role} className="mb-4">
+              <div className="text-[12px] uppercase text-(--text-tertiary) font-semibold px-2 mb-1.5 tracking-wide">
+                {role} — {roleMembers.length}
+              </div>
+              <div className="space-y-0.5">
+                {roleMembers.map((member) => (
+                  <div
+                    key={member.id}
+                    className="flex items-center gap-2 px-2 py-1 rounded hover:bg-(--background-secondary) cursor-pointer transition-colors group"
+                  >
+                    {/* Avatar with Status */}
+                    <div className="relative shrink-0">
+                      <img
+                        src={member.avatar}
+                        alt={member.username}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                      <span
+                        className={clsx(
+                          "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-(--background-base-lowest)",
+                          member.status === "online" && "bg-(--status-online)",
+                          member.status === "idle" && "bg-(--status-idle)",
+                          member.status === "dnd" && "bg-(--status-dnd)",
+                          member.status === "offline" && "bg-(--status-offline)"
+                        )}
+                      />
+                    </div>
+
+                    {/* Username */}
+                    <span className="text-sm text-(--text-primary) truncate flex-1">
+                      {member.username}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))
+        ) : (
+          // Filtered list
+          <div className="space-y-0.5">
+            {filteredMembers.map((member) => (
+              <div
+                key={member.id}
+                className="flex items-center gap-2 px-2 py-1 rounded hover:bg-(--background-secondary) cursor-pointer transition-colors"
+              >
+                <div className="relative shrink-0">
+                  <img
+                    src={member.avatar}
+                    alt={member.username}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                  <span
+                    className={clsx(
+                      "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-(--background-base-lowest)",
+                      member.status === "online" && "bg-(--status-online)",
+                      member.status === "idle" && "bg-(--status-idle)",
+                      member.status === "dnd" && "bg-(--status-dnd)",
+                      member.status === "offline" && "bg-(--status-offline)"
+                    )}
+                  />
+                </div>
+                <span className="text-sm text-(--text-primary) truncate flex-1">
+                  {member.username}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+============================================================
+FILE: src/components/layout/ApplicationTopBar.tsx
+============================================================
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import clsx from "clsx";
+
+export default function ApplicationTopBar() {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const [canGoBack, setCanGoBack] = useState(false);
+  const [canGoForward, setCanGoForward] = useState(false);
+
+  // Track navigation history
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let historyStack = JSON.parse(sessionStorage.getItem("app-history") || "[]");
+    let forwardStack = JSON.parse(sessionStorage.getItem("app-forward") || "[]");
+
+    const last = historyStack[historyStack.length - 1];
+
+    // If navigating to a new path → push to history
+    if (last !== pathname) {
+      historyStack.push(pathname);
+      sessionStorage.setItem("app-history", JSON.stringify(historyStack));
+      // New page → forward stack cleared
+      sessionStorage.setItem("app-forward", JSON.stringify([]));
+      forwardStack = [];
+    }
+
+    setCanGoBack(historyStack.length > 1);
+    setCanGoForward(forwardStack.length > 0);
+  }, [pathname]);
+
+  const handleBack = () => {
+    let historyStack = JSON.parse(sessionStorage.getItem("app-history") || "[]");
+    let forwardStack = JSON.parse(sessionStorage.getItem("app-forward") || "[]");
+
+    if (historyStack.length > 1) {
+      const current = historyStack.pop(); // Remove current page
+      forwardStack.push(current); // Add to forward stack
+
+      const previous = historyStack[historyStack.length - 1];
+
+      sessionStorage.setItem("app-history", JSON.stringify(historyStack));
+      sessionStorage.setItem("app-forward", JSON.stringify(forwardStack));
+
+      router.push(previous);
+    }
+  };
+
+  const handleForward = () => {
+    let historyStack = JSON.parse(sessionStorage.getItem("app-history") || "[]");
+    let forwardStack = JSON.parse(sessionStorage.getItem("app-forward") || "[]");
+
+    if (forwardStack.length > 0) {
+      const next = forwardStack.pop(); // Get next page
+
+      historyStack.push(next);
+
+      sessionStorage.setItem("app-history", JSON.stringify(historyStack));
+      sessionStorage.setItem("app-forward", JSON.stringify(forwardStack));
+
+      router.push(next);
+    }
+  };
+
+  // Dynamic title like Discord
+  const getTitle = (): string => {
+    if (pathname?.startsWith("/channels/@me/")) {
+      const dmId = pathname.split("/channels/@me/")[1];
+      return `DM with User ${dmId}`;
+    }
+    if (pathname === "/channels/@me") {
+      return "Friends";
+    }
+    if (pathname?.startsWith("/channels/")) {
+      return "Server Channel";
+    }
+    return "Discord";
+  };
+
+  return (
+    <header className="flex items-center justify-between bg-(--background-base-lowest) shrink-0 px-2">
+      {/* Left Nav */}
+      <div className="flex items-center gap-1">
+        <button
+          onClick={handleBack}
+          disabled={!canGoBack}
+          className={clsx(
+            "transition-colors p-2 rounded",
+            canGoBack
+              ? "text-(--text-primary) hover:bg-(--background-secondary) cursor-pointer"
+              : "text-(--text-tertiary) cursor-not-allowed opacity-50"
+          )}
+          aria-label="Back"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path d="M3.3 11.3a1 1 0 0 0 0 1.4l5 5a1 1 0 0 0 1.4-1.4L6.42 13H20a1 1 0 1 0 0-2H6.41l3.3-3.3a1 1 0 0 0-1.42-1.4l-5 5Z" />
+          </svg>
+        </button>
+
+        <button
+          onClick={handleForward}
+          disabled={!canGoForward}
+          className={clsx(
+            "transition-colors p-2 rounded",
+            canGoForward
+              ? "text-(--text-primary) hover:bg-(--background-secondary) cursor-pointer"
+              : "text-(--text-tertiary) cursor-not-allowed opacity-50"
+          )}
+          aria-label="Forward"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path d="M20.7 12.7a1 1 0 0 0 0-1.4l-5-5a1 1 0 1 0-1.4 1.4l3.29 3.3H4a1 1 0 1 0 0 2h13.59l-3.3 3.3a1 1 0 0 0 1.42 1.4l5-5Z" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Middle - Title */}
+      <div className="flex-1 text-left ml-4">
+        <h1 className="text-(--text-primary) text-[15px] text-center font-semibold">
+          {getTitle()}
+        </h1>
+      </div>
+
+      {/* Right side (actions) */}
+      <div className="flex items-center gap-2">
+        {/* Add actions here later */}
+      </div>
+    </header>
+  );
+}
 
 
 ============================================================
@@ -1914,7 +2840,7 @@ export default function DmBar() {
     <aside
       ref={dmBarRef}
       className={clsx(
-        "bg-(--background-base-lowest) text-(--text-primary) flex flex-col h-full relative border-t border-(--border-normal) overflow-hidden flex-none",
+        "bg-(--background-base-lowest) text-(--text-primary) flex flex-col h-full relative overflow-hidden flex-none border-t border-(--border-normal) select-text",
         isResizing && "select-none"
       )}
       style={{
@@ -2103,6 +3029,66 @@ export default function DmBar() {
 
 
 ============================================================
+FILE: src/components/layout/MainContentArea.tsx
+============================================================
+"use client";
+
+import React, { ReactNode, useState } from "react";
+import ContentTopBar from "./ContentTopBar/ContentTopBar";
+import DmUserProfile from "./RightPanels/DmUserProfile";
+import MemberList from "./RightPanels/MemberList";
+import { useRouteDetection } from "../hooks/useRouteDetection";
+
+interface MainContentAreaProps {
+  children: ReactNode;
+}
+
+export default function MainContentArea({ children }: MainContentAreaProps) {
+  const routeInfo = useRouteDetection();
+  const [showDmProfile, setShowDmProfile] = useState(true);
+
+  return (
+    <main className="flex-1 flex overflow-hidden flex-col relative bg-(--background-secondary)">
+      {/* Content TopBar (Dynamic - changes based on route) */}
+      <ContentTopBar
+        isDM={routeInfo.isDM}
+        isFriends={routeInfo.isFriends}
+        isServer={routeInfo.isServer}
+        dmId={routeInfo.dmId || undefined}
+        serverId={routeInfo.serverId || undefined}
+        channelId={routeInfo.channelId || undefined}
+        showDmProfile={showDmProfile}
+        onToggleDmProfile={() => setShowDmProfile(!showDmProfile)}
+      />
+
+      {/* Content Body with Right Panel */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Main Content */}
+        <div className="flex-1 overflow-hidden">{children}</div>
+
+        {/* Right Panel - DM Profile */}
+        {routeInfo.isDM && routeInfo.dmId && showDmProfile && (
+          <aside className="w-[300px] border-l border-(--border-normal) shrink-0 bg-(--background-base-lowest)">
+            <DmUserProfile dmId={routeInfo.dmId} />
+          </aside>
+        )}
+
+        {/* Right Panel - Member List */}
+        {routeInfo.isServer && routeInfo.serverId && routeInfo.channelId && (
+          <aside className="w-[240px] border-l border-(--border-normal) shrink-0 bg-(--background-base-lowest)">
+            <MemberList
+              serverId={routeInfo.serverId}
+              channelId={routeInfo.channelId}
+            />
+          </aside>
+        )}
+      </div>
+    </main>
+  );
+}
+
+
+============================================================
 FILE: src/components/layout/ServersBar.tsx
 ============================================================
 "use client";
@@ -2210,6 +3196,32 @@ export default function ServersBar() {
     </nav>
   );
 }
+
+
+============================================================
+FILE: src/components/layout/SidebarContainer.tsx
+============================================================
+"use client";
+
+import React, { ReactNode } from "react";
+import DmBar from "./Dmbar";
+import ChannelsList from "./ChannelsList";
+import { useRouteDetection } from "../hooks/useRouteDetection";
+
+export default function SidebarContainer() {
+  const { isDM, isFriends, isServer } = useRouteDetection();
+
+  if (isDM || isFriends) {
+    return <DmBar />;
+  }
+
+  if (isServer) {
+    return <ChannelsList />;
+  }
+
+  return null;
+}
+
 
 
 ============================================================
@@ -2373,7 +3385,7 @@ export default function UserPanel() {
                   hover:rounded-2xl transition-all duration-200">
                   {"mohamed".charAt(0)}
                 </div>
-                {/* <div
+                <div
                   className={clsx(
                     "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-(--background-base-lowest)",
                     "online" === "online"
@@ -2384,7 +3396,7 @@ export default function UserPanel() {
                       ? "bg-(--status-dnd)"
                       : "bg-(--status-offline)"
                   )}
-                /> */}
+                />
               </div>
             </Tooltip>
 
@@ -2500,172 +3512,6 @@ export default function UserPanel() {
             </div>
           </div>
         )} */
-
-============================================================
-FILE: src/components/ui/ContentTopBar/ContentTopBar.tsx
-============================================================
-"use client";
-import React from "react";
-
-interface Props {
-  isDM: boolean;
-  isFriends: boolean;
-  isServer: boolean;
-  dmId?: string | null;
-}
-
-export default function ContentTopBar({ isDM, isFriends, isServer, dmId }: Props) {
-  if (isFriends) {
-    return (
-      <div className="h-12 border-b border-(--border-primary) flex items-center px-4 gap-4">
-        <button className="text-(--text-primary) font-semibold">Friends</button>
-        <button className="text-(--text-secondary)">Online</button>
-        <button className="text-(--text-secondary)">Pending</button>
-        <button className="text-(--text-secondary)">Blocked</button>
-
-        <button className="ml-auto bg-(--accent-primary) px-3 py-1 rounded">
-          Add Friend
-        </button>
-      </div>
-    );
-  }
-
-  if (isDM) {
-    return (
-      <div className="h-12 border-b border-(--border-primary) flex items-center px-4 gap-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gray-600"></div>
-          <span className="font-semibold">DM with {dmId}</span>
-        </div>
-
-        <div className="ml-auto flex gap-3">
-          <button>📞</button>
-          <button>🎥</button>
-          <button>👤</button>
-        </div>
-      </div>
-    );
-  }
-
-  if (isServer) {
-    return (
-      <div className="h-12 border-b border-(--border-primary) flex items-center px-4 gap-4">
-        <span className="font-semibold"># general</span>
-
-        <div className="ml-auto">
-          <input
-            placeholder="Search"
-            className="px-2 py-1 bg-(--background-base-lower) rounded"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  return null;
-}
-
-
-============================================================
-FILE: src/components/ui/ContentTopBar/TopBarDM.tsx
-============================================================
-export default function TopBarDM({ dmId }) {
-  return (
-    <div className="h-12 flex items-center border-b border-(--border-primary) px-4">
-      <div className="flex items-center gap-2">
-        {/* <Avatar userId={dmId} /> */}
-        <span className="font-semibold">User {dmId}</span>
-      </div>
-      <div className="ml-auto flex gap-3">
-        {/* <ActionButton icon="phone" />
-        <ActionButton icon="video" />
-        <ActionButton icon="profile" /> */}
-      </div>
-    </div>
-  );
-}
-
-
-============================================================
-FILE: src/components/ui/ContentTopBar/TopBarFriends.tsx
-============================================================
-export default function TopBarFriends() {
-  return (
-    <div className="h-12 flex items-center border-b border-(--border-primary) px-4 gap-4">
-      <SectionTitle>Friends</SectionTitle>
-      <button>Online</button>
-      <button>Pending</button>
-      <button>Blocked</button>
-
-      <button className="ml-auto bg-(--accent-primary) px-3 py-1 rounded">
-        Add Friend
-      </button>
-    </div>
-  );
-}
-
-
-============================================================
-FILE: src/components/ui/ContentTopBar/TopBarLayout.tsx
-============================================================
-import TopBarDM from "./TopBarDM";
-import TopBarFriends from "./TopBarFriends";
-import TopBarServer from "./TopBarServer";
-
-export default function TopBarLayout({ isDM, isFriends, isServer, dmId }) {
-  if (isFriends) return <TopBarFriends />;
-  if (isDM) return <TopBarDM dmId={dmId} />;
-  if (isServer) return <TopBarServer />;
-  return null;
-}
-
-
-============================================================
-FILE: src/components/ui/ContentTopBar/TopBarServer.tsx
-============================================================
-export default function TopBarServer() {
-  return (
-    <div className="h-12 flex items-center border-b border-(--border-primary) px-4">
-      <SectionTitle># general</SectionTitle>
-
-      <div className="ml-auto">
-        <input className="px-2 py-1 bg-(--background-base-low) rounded" placeholder="Search" />
-      </div>
-    </div>
-  );
-}
-
-
-============================================================
-FILE: src/components/ui/parts/ActionButton.tsx
-============================================================
-import { Phone, Video, User } from "lucide-react";
-
-const icons = {
-  phone: Phone,
-  video: Video,
-  profile: User
-};
-
-export default function ActionButton({ icon }) {
-  const Icon = icons[icon];
-  return (
-    <button className="p-1 hover:bg-[var(--background-hover)] rounded">
-      <Icon size={18} />
-    </button>
-  );
-}
-
-
-============================================================
-FILE: src/components/ui/parts/Avatar.tsx
-============================================================
-export default function Avatar() {
-  return <div className="w-8 h-8 bg-gray-600 rounded-full">
-    
-  </div>;
-}
-
 
 ============================================================
 FILE: src/components/ui/Badge.tsx

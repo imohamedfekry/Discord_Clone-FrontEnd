@@ -6,7 +6,7 @@ import Tooltip from "../ui/Tooltip";
 export default function UserPanel() {
   return (
     <div className="absolute left-2 bottom-2 right-2 z-10 w-fit">
-      <div className="h-[60px] bg-(--background-secondary) border border-(--border-normal) rounded-lg overflow-hidden w-[calc(var(--dmbar-width)+55px)]">
+      <div className="h-[60px] w-[calc(var(--sidebar-width)+55px)] bg-(--background-secondary) border border-(--border-normal) rounded-lg overflow-hidden">
         {/* نفس ارتفاع MessageInput */}
         <div className="flex items-center justify-between px-2 h-full">
           {/* User Info */}
@@ -17,7 +17,7 @@ export default function UserPanel() {
                   hover:rounded-2xl transition-all duration-200">
                   {"mohamed".charAt(0)}
                 </div>
-                {/* <div
+                <div
                   className={clsx(
                     "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-(--background-base-lowest)",
                     "online" === "online"
@@ -28,7 +28,7 @@ export default function UserPanel() {
                       ? "bg-(--status-dnd)"
                       : "bg-(--status-offline)"
                   )}
-                /> */}
+                />
               </div>
             </Tooltip>
 

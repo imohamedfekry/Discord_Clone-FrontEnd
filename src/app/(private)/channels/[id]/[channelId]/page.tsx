@@ -1,27 +1,21 @@
 "use client";
+
 import React from "react";
 import { useParams } from "next/navigation";
-import MessageList from "@/components/chat/MessageList";
-import MessageInput from "@/components/chat/MessageInput";
+import ServerChannel from "@/components/channels/ServerChannel";
 
 export default function ServerChannelPage() {
   const params = useParams();
   const serverId = params?.id as string;
   const channelId = params?.channelId as string;
 
-  return (
-    // <div className="flex-1 flex flex-col h-full bg-(--background-base-lowest)">
-    //   {/* Messages Area */}
-    //   <div className="flex-1 overflow-y-auto">
-    //     <MessageList channelId={channelId} type="channel" />
-    //   </div>
-      
-    //   {/* Input Area */}
-    //     <MessageInput channelId={channelId} type="channel" placeholder={`Message #channel`} />
-    // </div>
-    <>
-    
-    <h1>ServerChannelPage</h1>
-    </>
-  );
+  if (!serverId || !channelId) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-(--text-secondary)">Loading...</div>
+      </div>
+    );
+  }
+
+  return <ServerChannel serverId={serverId} channelId={channelId} />;
 }

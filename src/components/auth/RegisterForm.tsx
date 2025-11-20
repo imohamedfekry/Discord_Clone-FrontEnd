@@ -131,7 +131,7 @@ export function RegisterForm() {
       } else if (res.code === "USERNAME_TAKEN") {
         setFieldError("username", { type: "manual", message: res.message });
       } else if (res.code === "USER_CREATED") {
-        router.push("/channels/@me");
+        router.push("/channels/me");
       } else {
         setFormError(res.message || "Registration failed");
       }

@@ -10,56 +10,20 @@ import { NitroIcon } from "../assets/icons/nitro";
 import { ShopIcon } from "../assets/icons/shop";
 import { FamilyCenterIcon } from "../assets/icons/family-center";
 import { QuestsIcon } from "../assets/icons/quests";
+import { useResizableSidebar } from "../hooks/useResizableSidebar";
 
 export default function DmBar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [isResizing, setIsResizing] = useState(false);
   const dmBarRef = useRef<HTMLDivElement>(null);
 
-  // Width state
-  const [width, setWidth] = useState<number | null>(null);
+  const { width, isResizing, startResizing } = useResizableSidebar();
   
   // Get active DM ID from pathname
-  const activeDMId = pathname?.startsWith("/channels/@me/") 
-    ? pathname.split("/channels/@me/")[1] 
-    : pathname?.startsWith("/channels/@me/")
-    ? pathname.split("/channels/@me/")[1]
-    : null;
-
-  // Load width
-  useEffect(() => {
-    const savedWidth = localStorage.getItem("dmbar-width");
-    setWidth(savedWidth ? parseInt(savedWidth, 10) : 260);
-  }, []);
-
-  // Save width + CSS variable
-  useEffect(() => {
-    if (width !== null) {
-      document.documentElement.style.setProperty("--dmbar-width", `${width}px`);
-      localStorage.setItem("dmbar-width", width.toString());
-    }
-  }, [width]);
-
-  // Resize logic
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isResizing) return;
-      const newWidth = e.clientX - 72;
-      if (newWidth >= 200 && newWidth <= 350) setWidth(newWidth);
-    };
-
-    const handleMouseUp = () => setIsResizing(false);
-
-    if (isResizing) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-    }
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isResizing]);
+  const activeDMId =
+    pathname?.startsWith("/channels/@me/") && pathname.split("/").length === 4
+      ? pathname.split("/")[3]
+      : null;
 
   if (width === null) {
     return null;
@@ -91,7 +55,7 @@ export default function DmBar() {
     <aside
       ref={dmBarRef}
       className={clsx(
-        "bg-(--background-base-lowest) text-(--text-primary) flex flex-col h-full relative border-t border-(--border-normal) overflow-hidden flex-none",
+        "bg-(--background-base-lowest) text-(--text-primary) flex flex-col h-full relative overflow-hidden flex-none border-t border-(--border-normal) select-text",
         isResizing && "select-none"
       )}
       style={{
@@ -107,7 +71,7 @@ export default function DmBar() {
             ? "bg-(--background-secondary-alt)/90"
             : "bg-transparent hover:bg-(--background-secondary-alt)/90"
         )}
-        onMouseDown={() => setIsResizing(true)}
+        onMouseDown={startResizing}
         title="Drag to resize"
       >
         <div className="absolute inset-y-0 -right-2 w-1" />
@@ -139,7 +103,7 @@ export default function DmBar() {
           onClick={() => router.push("/channels/@me")}
           className={clsx(
             "flex items-center justify-between px-2 py-2 rounded-[5px] cursor-pointer transition-colors",
-            pathname === "/channels/@me" || pathname === "/channels/@me"
+            pathname === "/channels/@me"
               ? "bg-(--background-secondary) text-(--text-primary)"
               : "text-(--text-secondary) hover:bg-(--background-secondary) hover:text-(--text-primary)"
           )}
