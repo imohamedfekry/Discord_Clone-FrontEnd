@@ -1,36 +1,67 @@
 "use client";
-import React, { createContext, useContext, useEffect, ReactNode } from "react";
-import { useThemeStore } from "@/components/store/themeStore";
+import React, { createContext, useContext, useEffect, ReactNode, useMemo, useCallback } from "react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { hydrateTheme, setTheme, type ThemeMode } from "@/store/themeSlice";
 
 interface ThemeContextType {
-  theme: "light" | "dark";
-  setTheme: (theme: "light" | "dark") => void;
+  theme: ThemeMode;
+  setTheme: (theme: ThemeMode) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 interface ThemeProviderProps {
   children: ReactNode;
-  userTheme?: "light" | "dark" | null;
+  userTheme?: ThemeMode | null;
 }
 
+const THEME_STORAGE_KEY = "discord-theme-storage";
+
 export function ThemeProvider({ children, userTheme }: ThemeProviderProps) {
-  const { theme, setTheme } = useThemeStore();
+  const dispatch = useAppDispatch();
+  const theme = useAppSelector((state) => state.theme.theme);
+  const hydrated = useAppSelector((state) => state.theme.hydrated);
 
   useEffect(() => {
-    const finalTheme = userTheme || theme;
-    document.documentElement.setAttribute("data-theme", finalTheme);
-    
-    if (userTheme && userTheme !== theme) {
-      setTheme(userTheme);
-    }
-  }, [userTheme, theme, setTheme]);
+    if (hydrated) return;
+    const storedTheme =
+      typeof window !== "undefined"
+        ? (localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode | null)
+        : null;
 
-  return (
-    <ThemeContext.Provider value={{ theme: userTheme || theme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
+    dispatch(hydrateTheme(userTheme || storedTheme || "dark"));
+  }, [dispatch, hydrated, userTheme]);
+
+  useEffect(() => {
+    const finalTheme = (userTheme as ThemeMode | null) || theme;
+    if (!finalTheme || typeof window === "undefined") return;
+
+    document.documentElement.setAttribute("data-theme", finalTheme);
+    localStorage.setItem(THEME_STORAGE_KEY, finalTheme);
+  }, [theme, userTheme]);
+
+  useEffect(() => {
+    if (userTheme && userTheme !== theme) {
+      dispatch(setTheme(userTheme));
+    }
+  }, [dispatch, userTheme, theme]);
+
+  const handleSetTheme = useCallback(
+    (mode: ThemeMode) => {
+      dispatch(setTheme(mode));
+    },
+    [dispatch]
   );
+
+  const contextValue = useMemo(
+    () => ({
+      theme: (userTheme as ThemeMode | null) || theme,
+      setTheme: handleSetTheme,
+    }),
+    [theme, userTheme, handleSetTheme]
+  );
+
+  return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {
@@ -40,4 +71,3 @@ export function useTheme() {
   }
   return context;
 }
-

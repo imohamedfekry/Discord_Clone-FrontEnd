@@ -10,17 +10,18 @@ import React, {
   useCallback,
 } from "react";
 import { io, Socket } from "socket.io-client";
-import { useAuth } from "@/context/AuthContext";
-import { useSocketStore } from "@/components/store/socketStore";
+import { useAuth } from "@/components/hooks/useAuth";
+import { useAppDispatch } from "@/store/hooks";
+import { addIncomingRequest, removeRequest, setFriends, clearSocketState } from "@/store/socketSlice";
 
-type EventHandler = (...args: any[]) => void;
+type EventHandler = (...args: unknown[]) => void;
 
 interface SocketContextType {
   socket: Socket | null;
   connected: boolean;
   connect: () => void;
   disconnect: () => void;
-  emit: (event: string, payload?: any, ack?: (res: any) => void) => void;
+  emit: (event: string, payload?: unknown, ack?: (res: unknown) => void) => void;
   on: (event: string, handler: EventHandler) => void;
   off: (event: string, handler?: EventHandler) => void;
 }
@@ -30,15 +31,9 @@ const SocketContext = createContext<SocketContextType | undefined>(undefined);
 export function SocketProvider({ children }: { children: ReactNode }) {
   const socketRef = useRef<Socket | null>(null);
   const [connected, setConnected] = useState(false);
-
-  const {
-    setFriends,
-    addIncomingRequest,
-    addOutgoingRequest,
-    removeRequest,
-  } = useSocketStore();
-
-  const { user, loading } = useAuth();
+  const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
+  const dispatch = useAppDispatch();
+  const { user, initialized } = useAuth();
 
   const connect = useCallback(() => {
     if (socketRef.current) return;
@@ -51,6 +46,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     });
 
     socketRef.current = socket;
+    setSocketInstance(socket);
 
     socket.on("connect", () => setConnected(true));
     socket.on("disconnect", () => setConnected(false));
@@ -62,53 +58,63 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     // --------------------------
 
     socket.on("friend:request:received", (payload) => {
-      addIncomingRequest(payload.data || payload);
+      dispatch(addIncomingRequest(payload.data || payload));
     });
 
     socket.on("friend:request:accepted", (payload) => {
       const data = payload.data || payload;
-      removeRequest(data.id);
-      // ممكن تبعت حدث update friends list
+      dispatch(removeRequest(data.id));
     });
 
     socket.on("friend:request:rejected", (payload) => {
       const data = payload.data || payload;
-      removeRequest(data.id);
+      dispatch(removeRequest(data.id));
     });
 
     socket.on("friend:request:cancelled", (payload) => {
       const data = payload.data || payload;
-      removeRequest(data.id);
+      dispatch(removeRequest(data.id));
     });
 
     socket.on("friends:list", (list) => {
-      setFriends(list);
+      dispatch(setFriends(list));
     });
-
-  }, [setFriends, addIncomingRequest, addOutgoingRequest, removeRequest]);
-
-  useEffect(() => {
-    if (loading) return;
-
-    if (user) {
-      connect();
-    } else {
-      disconnect();
-    }
-
-    return () => disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, loading]);
+  }, [dispatch]);
 
   const disconnect = useCallback(() => {
     if (!socketRef.current) return;
     socketRef.current.removeAllListeners();
     socketRef.current.disconnect();
     socketRef.current = null;
+    setSocketInstance(null);
     setConnected(false);
-  }, []);
+    dispatch(clearSocketState());
+  }, [dispatch]);
 
-  const emit = (event: string, payload?: any, ack?: (res: any) => void) => {
+  useEffect(() => {
+    if (!initialized) return;
+    const schedule = (cb: () => void) => {
+      if (typeof queueMicrotask === "function") {
+        queueMicrotask(cb);
+      } else {
+        Promise.resolve().then(cb);
+      }
+    };
+
+    if (user) {
+      schedule(() => connect());
+    } else {
+      schedule(() => disconnect());
+    }
+  }, [user, initialized, connect, disconnect]);
+
+  useEffect(() => {
+    return () => {
+      disconnect();
+    };
+  }, [disconnect]);
+
+  const emit = (event: string, payload?: unknown, ack?: (res: unknown) => void) => {
     socketRef.current?.emit(event, payload, ack);
   };
 
@@ -122,7 +128,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <SocketContext.Provider value={{ socket: socketRef.current, connected, connect, disconnect, emit, on, off }}>
+    <SocketContext.Provider value={{ socket: socketInstance, connected, connect, disconnect, emit, on, off }}>
       {children}
     </SocketContext.Provider>
   );

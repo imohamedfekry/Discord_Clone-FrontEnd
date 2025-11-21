@@ -1,34 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useMemo } from "react";
 import { useSocket } from "@/context/SocketContext";
-import { useSocketStore } from "@/components/store/socketStore";
+import { useAuth } from "@/components/hooks/useAuth";
+import { useAppSelector } from "@/store/hooks";
+import type { RootState } from "@/store";
+import type { SocketState } from "@/store/socketSlice";
+
+const selectSocketState = (state: RootState): SocketState => state.socket as SocketState;
 
 export default function AppGate({ children }: { children: React.ReactNode }) {
-  const { user, loading: authLoading } = useAuth();
+  const { user, initialized } = useAuth();
   const { connected } = useSocket();
-  const { friends, incomingRequests, outgoingRequests } = useSocketStore();
+  const { friends, incomingRequests, outgoingRequests } = useAppSelector(selectSocketState);
+  const sessionLoading = !initialized;
 
-  // هل استلمنا الداتا الأولية؟
-  const [initialLoaded, setInitialLoaded] = useState(false);
-
-  useEffect(() => {
-    if (!connected) return;
-    // نعتبر الداتا اتحملت لما يكون على الأقل friends اتعبت
-    // وانت تقدر تغير شرطك
-    const ready =
+  const initialLoaded = useMemo(() => {
+    if (!connected) return false;
+    return (
       friends !== undefined &&
       incomingRequests !== undefined &&
-      outgoingRequests !== undefined;
-
-    if (ready) setInitialLoaded(true);
+      outgoingRequests !== undefined
+    );
   }, [connected, friends, incomingRequests, outgoingRequests]);
 
   // ---- Discord-Like Loading Phases ----
 
   // 1) Auth session loading
-  if (authLoading) {
+  if (sessionLoading) {
     return (
       <div className="flex items-center justify-center w-full h-screen bg-[#202225] text-white">
         <div className="text-2xl animate-pulse">Loading Session...</div>

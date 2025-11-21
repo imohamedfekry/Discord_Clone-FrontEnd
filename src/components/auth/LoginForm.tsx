@@ -7,7 +7,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../ui/Input";
 import { PrimaryButton } from "../ui/primary-button";
-import { authApi } from "../lib/authApi";
+import { useAuth } from "@/components/hooks/useAuth";
+
+interface AuthResponse {
+  code?: string;
+  message?: string;
+  [key: string]: unknown;
+}
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -23,6 +29,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export function LoginForm() {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
+  const { login, loading } = useAuth();
 
   const {
     register,
@@ -36,18 +43,19 @@ export function LoginForm() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setFormError(null);
-      const res = await authApi.login(data);
-
-      if (res.code !== "LOGIN_SUCCESS") {
-        const message = res.message || "Invalid credentials";
+      const res = (await login(data)) as AuthResponse;
+      if (res?.code && res.code !== "LOGIN_SUCCESS") {
+        const message = res?.message || "Invalid credentials";
         setFormError(message);
         return;
       }
-
       router.push("/channels/@me");
-    } catch (err: any) {
-      const message =
-        err.response?.data?.message || err.message || "Login failed";
+    } catch (err: unknown) {
+      const fallback =
+        err && typeof err === "object" && "message" in err
+          ? String((err as { message?: unknown }).message)
+          : null;
+      const message = typeof err === "string" ? err : fallback || "Login failed";
       setFormError(message);
     }
   };
@@ -60,7 +68,7 @@ export function LoginForm() {
             Welcome back!
           </h1>
           <p className="text-(--text-secondary) text-base text-center mb-5">
-            We're so excited to see you again!
+            We&apos;re so excited to see you again!
           </p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -101,8 +109,8 @@ export function LoginForm() {
 
             <PrimaryButton
               type="submit"
-              isLoading={isSubmitting}
-              disabled={isSubmitting}
+              isLoading={isSubmitting || loading}
+              disabled={isSubmitting || loading}
               className="mt-3 cursor-pointer w-full"
             >
               {isSubmitting ? "Logging In..." : "Log In"}

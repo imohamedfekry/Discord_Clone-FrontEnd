@@ -9,7 +9,7 @@ import { Input } from "../ui/Input";
 import { PrimaryButton } from "../ui/primary-button";
 import { SelectInput } from "../ui/select-input";
 import { CustomCheckbox } from "../ui/custom-checkbox";
-import { authApi } from "../lib/authApi";
+import { useAuth } from "@/components/hooks/useAuth";
 import { z } from "zod";
 import Tooltip from "../ui/Tooltip";
 
@@ -57,9 +57,16 @@ export const registerSchema = z
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
+interface RegisterResponse {
+  code?: string;
+  message?: string;
+  [key: string]: unknown;
+}
+
 export function RegisterForm() {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
+  const { register: registerAccount, loading } = useAuth();
 
   const {
     register: hookRegister,
@@ -114,29 +121,37 @@ export function RegisterForm() {
       const birthdate = `${Number(data.year)}-${Number(data.month)
         .toString()
         .padStart(2, "0")}-${Number(data.day).toString().padStart(2, "0")}`;
-      const res = await authApi.register({
+      const res = (await registerAccount({
         username: data.username,
         email: data.email,
         password: data.password,
         globalname: data.displayName,
         birthdate,
-      });
+      })) as RegisterResponse;
 
-      if (res.code === "SUCCESS") return router.push("/channels/@me");
-
-      const message = res.message || "Registration failed";
-
-      if (res.code === "USER_EMAIL_EXISTS") {
+      if (res?.code === "USER_EMAIL_EXISTS") {
         setFieldError("email", { type: "manual", message: res.message });
-      } else if (res.code === "USERNAME_TAKEN") {
-        setFieldError("username", { type: "manual", message: res.message });
-      } else if (res.code === "USER_CREATED") {
-        router.push("/channels/me");
-      } else {
-        setFormError(res.message || "Registration failed");
+        return;
       }
-    } catch (err: any) {
-      setFormError(err.message || "Registration failed");
+
+      if (res?.code === "USERNAME_TAKEN") {
+        setFieldError("username", { type: "manual", message: res.message });
+        return;
+      }
+
+      if (res?.code && res.code !== "SUCCESS" && res.code !== "USER_CREATED") {
+        setFormError(res.message || "Registration failed");
+        return;
+      }
+
+      router.push("/channels/@me");
+    } catch (err: unknown) {
+      const fallback =
+        err && typeof err === "object" && "message" in err
+          ? String((err as { message?: unknown }).message)
+          : null;
+      const message = typeof err === "string" ? err : fallback || "Registration failed";
+      setFormError(message);
     }
   };
 
@@ -222,7 +237,7 @@ export function RegisterForm() {
 
           <CustomCheckbox
             id="email-updates"
-            label="(Optional) It's okay to send me emails with Discord updates, tips, and special offers. You can opt out at any time."
+            label="(Optional) It&apos;s okay to send me emails with Discord updates, tips, and special offers. You can opt out at any time."
             checked={watchedValues.isEmailUpdatesChecked || false}
             onChange={(checked) => setValue("isEmailUpdatesChecked", checked)}
           />
@@ -234,7 +249,7 @@ export function RegisterForm() {
               onChange={(checked) => setValue("acceptedTerms", checked)}
             />
             <p className="text-sm text-(--text-secondary)">
-              I have read and agree to Discord's{" "}
+              I have read and agree to Discord&apos;s{" "}
               <Link href="#" className="text-(--accent-link) hover:underline">
                 Terms of Service
               </Link>{" "}
@@ -251,8 +266,8 @@ export function RegisterForm() {
               const button = (
                 <PrimaryButton
                   type="submit"
-                  isLoading={isSubmitting}
-                  disabled={isSubmitDisabled}
+                  isLoading={isSubmitting || loading}
+                  disabled={isSubmitDisabled || loading}
                   className="w-full"
                 >
                   {isSubmitting ? "Creating Account..." : "Create Account"}
