@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import clsx from "clsx";
+import Tooltip from "../ui/Tooltip";
 
 export default function ApplicationTopBar() {
   const pathname = usePathname();
@@ -85,11 +86,12 @@ export default function ApplicationTopBar() {
     <header className="flex items-center justify-between bg-(--background-base-lowest) shrink-0 px-2">
       {/* Left Nav */}
       <div className="flex items-center gap-1">
+        <Tooltip text="Back" side="bottom-left">
         <button
           onClick={handleBack}
           disabled={!canGoBack}
           className={clsx(
-            "transition-colors p-2 rounded",
+            "transition-colors p-1 rounded",
             canGoBack
               ? "text-(--text-primary) hover:bg-(--background-secondary) cursor-pointer"
               : "text-(--text-tertiary) cursor-not-allowed opacity-50"
@@ -106,6 +108,8 @@ export default function ApplicationTopBar() {
             <path d="M3.3 11.3a1 1 0 0 0 0 1.4l5 5a1 1 0 0 0 1.4-1.4L6.42 13H20a1 1 0 1 0 0-2H6.41l3.3-3.3a1 1 0 0 0-1.42-1.4l-5 5Z" />
           </svg>
         </button>
+        </Tooltip>
+                <Tooltip text="Back" side="bottom">
 
         <button
           onClick={handleForward}
@@ -118,6 +122,7 @@ export default function ApplicationTopBar() {
           )}
           aria-label="Forward"
         >
+
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
@@ -128,6 +133,8 @@ export default function ApplicationTopBar() {
             <path d="M20.7 12.7a1 1 0 0 0 0-1.4l-5-5a1 1 0 1 0-1.4 1.4l3.29 3.3H4a1 1 0 1 0 0 2h13.59l-3.3 3.3a1 1 0 0 0 1.42 1.4l5-5Z" />
           </svg>
         </button>
+                </Tooltip>
+
       </div>
 
       {/* Middle - Title */}

@@ -3,9 +3,9 @@ This digest is designed to be easily parsed by Large Language Models.
 
 --- SUMMARY ---
 Repository: front
-Files Analyzed: 79
-Total Text Size: 230.43 KB
-Estimated Tokens (text only): ~85,958
+Files Analyzed: 81
+Total Text Size: 230.45 KB
+Estimated Tokens (text only): ~86,060
 
 --- DIRECTORY STRUCTURE ---
 front/
@@ -65,6 +65,7 @@ front/
 │   │   ├── hooks/
 │   │   │   ├── useAuth.ts [binary]
 │   │   │   ├── useMessages.ts [binary]
+│   │   │   ├── useResizableSidebar.ts [binary]
 │   │   │   ├── useRouteDetection.ts [binary]
 │   │   │   └── useServers.ts [binary]
 │   │   ├── layout/
@@ -111,6 +112,7 @@ front/
 │   │   ├── SocketContext.tsx
 │   │   └── ThemeContext.tsx
 │   └── proxy.ts [binary]
+├── .mcp.json
 ├── eslint.config.mjs
 ├── next.config.ts [binary]
 ├── package.json
@@ -1404,7 +1406,7 @@ export function RegisterForm() {
       } else if (res.code === "USERNAME_TAKEN") {
         setFieldError("username", { type: "manual", message: res.message });
       } else if (res.code === "USER_CREATED") {
-        router.push("/channels/@me");
+        router.push("/channels/me");
       } else {
         setFormError(res.message || "Registration failed");
       }
@@ -1598,7 +1600,7 @@ import React from "react";
 
 export default function FriendsPage() {
   return (
-    <div className="flex-1 flex flex-col h-full bg-(--background-secondary)">
+    <div className="flex-1 flex flex-col h-full bg-(--background-base-low)">
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center max-w-md px-4">
           <div className="mb-4">
@@ -2020,7 +2022,7 @@ export default function TopBarDM({
               placeholder="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-[144px] h-[24px] px-2 pr-8 bg-(--background-secondary) border border-(--border-normal) rounded text-sm text-(--text-primary) placeholder-(--text-placeholder) focus:outline-none focus:ring-1 focus:ring-(--accent-primary)"
+              className="w-36 h-6 px-2 pr-8 bg-(--background-secondary) border border-(--border-normal) rounded text-sm text-(--text-primary) placeholder-(--text-placeholder) focus:outline-none focus:ring-1 focus:ring-(--accent-primary)"
             />
             {searchQuery ? (
               <button
@@ -2072,52 +2074,53 @@ FILE: src/components/layout/ContentTopBar/TopBarFriends.tsx
 import React, { useState } from "react";
 import clsx from "clsx";
 
-type FriendsTab = "all" | "online" | "pending" | "blocked";
+type FriendsTab = "all" | "online" | "pending" | "blocked" | "addFriend";
 
 export default function TopBarFriends() {
   const [activeTab, setActiveTab] = useState<FriendsTab>("all");
 
   const tabs: { id: FriendsTab; label: string }[] = [
-    { id: "all", label: "Friends" },
     { id: "online", label: "Online" },
+    { id: "all", label: "All" },
     { id: "pending", label: "Pending" },
     { id: "blocked", label: "Blocked" },
+    { id: "addFriend", label: "Add Friend" },
   ];
 
+  const handleTabClick = (tabId: FriendsTab) => {
+    setActiveTab(tabId);
+  };
+
+  const getTabStyles = (tabId: FriendsTab) => {
+    if (activeTab === tabId) {
+      if (tabId === "addFriend") {
+        return "text-[#8185e6] bg-[#242649]";
+      }
+      return "text-white bg-[#393c43]";
+    } else {
+      if (tabId === "addFriend") {
+        return "text-white bg-(--bg-brand)";
+      }
+      return "text-[#b5bac1] hover:text-white hover:bg-[#35373c]";
+    }
+  };
+
   return (
-    <div className="h-[50px] border-b border-t border-(--border-normal) flex items-center justify-between px-4 bg-(--background-secondary) ">
-      {/* Left: Tabs */}
-      <div className="flex items-center gap-8">
+    <div className="h-[50px] border-b border-t border-(--border-normal) flex items-center px-4 bg-[#2b2d31] select-none">
+      <div className="flex items-center gap-6">
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={clsx(
-              "text-sm font-medium transition-colors px-1 py-1 relative",
-              activeTab === tab.id
-                ? "text-(--text-primary)"
-                : "text-(--text-secondary) hover:text-(--text-primary)"
-            )}
+            onClick={() => handleTabClick(tab.id)}
+            className={clsx("relative text-[15px] font-medium p-4 transition rounded-md", getTabStyles(tab.id))}
           >
             {tab.label}
-            {activeTab === tab.id && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-(--accent-primary)" />
-            )}
           </button>
         ))}
       </div>
-
-      {/* Right: Add Friend Button */}
-      <button
-        className="ml-auto bg-(--accent-primary) hover:bg-(--accent-primary-hover) px-4 py-1.5 rounded text-sm font-medium text-white transition-colors"
-        aria-label="Add Friend"
-      >
-        Add Friend
-      </button>
     </div>
   );
 }
-
 
 ============================================================
 FILE: src/components/layout/ContentTopBar/TopBarServer.tsx
@@ -2182,7 +2185,7 @@ export default function TopBarServer({ serverId, channelId }: TopBarServerProps)
             placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-[144px] h-[24px] px-2 pr-8 bg-(--background-secondary) border border-(--border-normal) rounded text-sm text-(--text-primary) placeholder-(--text-placeholder) focus:outline-none focus:ring-1 focus:ring-(--accent-primary)"
+            className="w-36 h-6 px-2 pr-8 bg-(--background-secondary) border border-(--border-normal) rounded text-sm text-(--text-primary) placeholder-(--text-placeholder) focus:outline-none focus:ring-1 focus:ring-(--accent-primary)"
           />
           {searchQuery ? (
             <button
@@ -2540,6 +2543,7 @@ FILE: src/components/layout/ApplicationTopBar.tsx
 import React, { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import clsx from "clsx";
+import Tooltip from "../ui/Tooltip";
 
 export default function ApplicationTopBar() {
   const pathname = usePathname();
@@ -2622,11 +2626,12 @@ export default function ApplicationTopBar() {
     <header className="flex items-center justify-between bg-(--background-base-lowest) shrink-0 px-2">
       {/* Left Nav */}
       <div className="flex items-center gap-1">
+        <Tooltip text="Back" side="bottom-left">
         <button
           onClick={handleBack}
           disabled={!canGoBack}
           className={clsx(
-            "transition-colors p-2 rounded",
+            "transition-colors p-1 rounded",
             canGoBack
               ? "text-(--text-primary) hover:bg-(--background-secondary) cursor-pointer"
               : "text-(--text-tertiary) cursor-not-allowed opacity-50"
@@ -2643,6 +2648,8 @@ export default function ApplicationTopBar() {
             <path d="M3.3 11.3a1 1 0 0 0 0 1.4l5 5a1 1 0 0 0 1.4-1.4L6.42 13H20a1 1 0 1 0 0-2H6.41l3.3-3.3a1 1 0 0 0-1.42-1.4l-5 5Z" />
           </svg>
         </button>
+        </Tooltip>
+                <Tooltip text="Back" side="bottom">
 
         <button
           onClick={handleForward}
@@ -2655,6 +2662,7 @@ export default function ApplicationTopBar() {
           )}
           aria-label="Forward"
         >
+
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
@@ -2665,6 +2673,8 @@ export default function ApplicationTopBar() {
             <path d="M20.7 12.7a1 1 0 0 0 0-1.4l-5-5a1 1 0 1 0-1.4 1.4l3.29 3.3H4a1 1 0 1 0 0 2h13.59l-3.3 3.3a1 1 0 0 0 1.42 1.4l5-5Z" />
           </svg>
         </button>
+                </Tooltip>
+
       </div>
 
       {/* Middle - Title */}
@@ -2691,10 +2701,12 @@ FILE: src/components/layout/ChannelsList.tsx
 import React from "react";
 import { useParams } from "next/navigation";
 import clsx from "clsx";
+import { useResizableSidebar } from "../hooks/useResizableSidebar";
 
 export default function ChannelsList() {
   const params = useParams();
   const serverId = params?.id as string;
+  const { width, isResizing, startResizing } = useResizableSidebar();
 
   // Mock channels data
   const channels = [
@@ -2703,8 +2715,41 @@ export default function ChannelsList() {
     { id: "3", name: "voice-chat", type: "voice" },
   ];
 
+  if (width === null) {
+    return null;
+  }
+
   return (
-    <aside className="w-60 bg-(--background-base-low) flex flex-col h-full border-r border-(--border-normal)">
+    <aside
+      className={clsx(
+        "bg-(--background-base-low) flex flex-col h-full border-r border-(--border-normal) relative overflow-hidden flex-none",
+        isResizing && "select-none"
+      )}
+      style={{
+        width: `${width}px`,
+        cursor: isResizing ? "col-resize" : "default",
+      }}
+    >
+      {/* Resize handle */}
+      <div
+        className={clsx(
+          "absolute top-0 right-0 w-0.5 h-full cursor-ew-resize transition-colors z-10",
+          isResizing
+            ? "bg-(--background-secondary-alt)/90"
+            : "bg-transparent hover:bg-(--background-secondary-alt)/90"
+        )}
+        onMouseDown={startResizing}
+        title="Drag to resize"
+      >
+        <div className="absolute inset-y-0 -right-2 w-1" />
+      </div>
+
+      {isResizing && (
+        <div
+          className="fixed inset-0 z-50 cursor-ew-resize"
+          style={{ pointerEvents: "all" }}
+        />
+      )}
       {/* Server Header */}
       <div className="h-12 px-4 flex items-center border-b border-(--border-normal) shadow-sm">
         <h2 className="text-base font-semibold text-(--text-primary) truncate">
@@ -2759,56 +2804,20 @@ import { NitroIcon } from "../assets/icons/nitro";
 import { ShopIcon } from "../assets/icons/shop";
 import { FamilyCenterIcon } from "../assets/icons/family-center";
 import { QuestsIcon } from "../assets/icons/quests";
+import { useResizableSidebar } from "../hooks/useResizableSidebar";
 
 export default function DmBar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [isResizing, setIsResizing] = useState(false);
   const dmBarRef = useRef<HTMLDivElement>(null);
 
-  // Width state
-  const [width, setWidth] = useState<number | null>(null);
+  const { width, isResizing, startResizing } = useResizableSidebar();
   
   // Get active DM ID from pathname
-  const activeDMId = pathname?.startsWith("/channels/@me/") 
-    ? pathname.split("/channels/@me/")[1] 
-    : pathname?.startsWith("/channels/@me/")
-    ? pathname.split("/channels/@me/")[1]
-    : null;
-
-  // Load width
-  useEffect(() => {
-    const savedWidth = localStorage.getItem("dmbar-width");
-    setWidth(savedWidth ? parseInt(savedWidth, 10) : 260);
-  }, []);
-
-  // Save width + CSS variable
-  useEffect(() => {
-    if (width !== null) {
-      document.documentElement.style.setProperty("--dmbar-width", `${width}px`);
-      localStorage.setItem("dmbar-width", width.toString());
-    }
-  }, [width]);
-
-  // Resize logic
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isResizing) return;
-      const newWidth = e.clientX - 72;
-      if (newWidth >= 200 && newWidth <= 350) setWidth(newWidth);
-    };
-
-    const handleMouseUp = () => setIsResizing(false);
-
-    if (isResizing) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-    }
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isResizing]);
+  const activeDMId =
+    pathname?.startsWith("/channels/@me/") && pathname.split("/").length === 4
+      ? pathname.split("/")[3]
+      : null;
 
   if (width === null) {
     return null;
@@ -2856,7 +2865,7 @@ export default function DmBar() {
             ? "bg-(--background-secondary-alt)/90"
             : "bg-transparent hover:bg-(--background-secondary-alt)/90"
         )}
-        onMouseDown={() => setIsResizing(true)}
+        onMouseDown={startResizing}
         title="Drag to resize"
       >
         <div className="absolute inset-y-0 -right-2 w-1" />
@@ -2888,7 +2897,7 @@ export default function DmBar() {
           onClick={() => router.push("/channels/@me")}
           className={clsx(
             "flex items-center justify-between px-2 py-2 rounded-[5px] cursor-pointer transition-colors",
-            pathname === "/channels/@me" || pathname === "/channels/@me"
+            pathname === "/channels/@me"
               ? "bg-(--background-secondary) text-(--text-primary)"
               : "text-(--text-secondary) hover:bg-(--background-secondary) hover:text-(--text-primary)"
           )}
@@ -3297,13 +3306,11 @@ export default function TopBar() {
 
   // Dynamic title like Discord
   const getTitle = () => {
-    if (pathname?.startsWith("/channels/@me/") || pathname?.startsWith("/channels/@me/")) {
-      const dmId = pathname.includes("/channels/@me/")
-        ? pathname.split("/channels/@me/")[1]
-        : pathname.split("/channels/@me/")[1];
+    if (pathname?.startsWith("/channels/@me/")) {
+      const dmId = pathname.split("/channels/@me/")[1];
       return `DM with User ${dmId}`;
     }
-    if (pathname === "/channels/@me" || pathname === "/channels/@me") {
+    if (pathname === "/channels/@me") {
       return "Friends";
     }
     if (pathname?.startsWith("/channels/")) {
@@ -3374,7 +3381,7 @@ import Tooltip from "../ui/Tooltip";
 export default function UserPanel() {
   return (
     <div className="absolute left-2 bottom-2 right-2 z-10 w-fit">
-      <div className="h-[60px] bg-(--background-secondary) border border-(--border-normal) rounded-lg overflow-hidden w-[calc(var(--dmbar-width)+55px)]">
+      <div className="h-[60px] w-[calc(var(--sidebar-width)+55px)] bg-(--background-secondary) border border-(--border-normal) rounded-lg overflow-hidden">
         {/* نفس ارتفاع MessageInput */}
         <div className="flex items-center justify-between px-2 h-full">
           {/* User Info */}
@@ -4582,6 +4589,19 @@ export function useTheme() {
 
 
 ============================================================
+FILE: .mcp.json
+============================================================
+{
+    "mcpServers": {
+      "next-devtools": {
+        "command": "npx",
+        "args": ["-y", "next-devtools-mcp@latest"]
+      }
+    }
+  }
+  
+
+============================================================
 FILE: eslint.config.mjs
 ============================================================
 import { defineConfig, globalIgnores } from "eslint/config";
@@ -4625,6 +4645,7 @@ FILE: package.json
     "clsx": "^2.1.1",
     "js-cookie": "^3.0.5",
     "next": "16.0.1",
+    "next-devtools-mcp": "^0.3.3",
     "next-themes": "^0.4.6",
     "react": "19.2.0",
     "react-dom": "19.2.0",

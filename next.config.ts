@@ -7,8 +7,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: '/channels/@me', 
-        destination: '/channels/me',
+        source: "/channels/@me",
+        destination: "/channels/me",
       },
     ];
   },

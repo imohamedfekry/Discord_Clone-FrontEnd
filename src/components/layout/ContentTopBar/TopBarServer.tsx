@@ -58,7 +58,7 @@ export default function TopBarServer({ serverId, channelId }: TopBarServerProps)
             placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-[144px] h-[24px] px-2 pr-8 bg-(--background-secondary) border border-(--border-normal) rounded text-sm text-(--text-primary) placeholder-(--text-placeholder) focus:outline-none focus:ring-1 focus:ring-(--accent-primary)"
+            className="w-36 h-6 px-2 pr-8 bg-(--background-secondary) border border-(--border-normal) rounded text-sm text-(--text-primary) placeholder-(--text-placeholder) focus:outline-none focus:ring-1 focus:ring-(--accent-primary)"
           />
           {searchQuery ? (
             <button
