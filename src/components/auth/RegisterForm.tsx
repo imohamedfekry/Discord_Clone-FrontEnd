@@ -9,7 +9,7 @@ import { Input } from "../ui/Input";
 import { PrimaryButton } from "../ui/primary-button";
 import { SelectInput } from "../ui/select-input";
 import { CustomCheckbox } from "../ui/custom-checkbox";
-import { useAuth } from "@/components/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
 import Tooltip from "../ui/Tooltip";
 

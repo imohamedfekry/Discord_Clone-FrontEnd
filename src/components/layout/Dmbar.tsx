@@ -18,7 +18,7 @@ export default function DmBar() {
   const dmBarRef = useRef<HTMLDivElement>(null);
 
   const { width, isResizing, startResizing } = useResizableSidebar();
-  
+
   // Get active DM ID from pathname
   const activeDMId =
     pathname?.startsWith("/channels/@me/") && pathname.split("/").length === 4
@@ -88,8 +88,8 @@ export default function DmBar() {
 
       <div className="px-2 py-1.5 border-b border-(--border-normal)">
         <button
-          className="cursor-pointer w-full font-medium bg-(--background-secondary) text-white text-sm placeholder-(--text-placeholder) py-2 rounded-lg text-center hover:bg-(--background-input) transition-colors"
-          // onClick={() => alert("Search clicked")}
+          className="cursor-pointer w-full font-medium bg-(--background-secondary) text-(--text-primary) text-sm placeholder-(--text-placeholder) py-2 rounded-lg text-center "
+        // onClick={() => alert("Search clicked")}
         >
           {" "}
           Find or start a conversation{" "}
@@ -104,8 +104,8 @@ export default function DmBar() {
           className={clsx(
             "flex items-center justify-between px-2 py-2 rounded-[5px] cursor-pointer transition-colors",
             pathname === "/channels/@me"
-              ? "bg-(--background-secondary) text-(--text-primary)"
-              : "text-(--text-secondary) hover:bg-(--background-secondary) hover:text-(--text-primary)"
+              ? "bg-(--background-modifier-selected) text-(--text-primary)"
+              : "text-(--text-secondary) hover:bg-(--background-modifier-hover) hover:text-(--text-primary) active:bg-(--background-modifier-active)"
           )}
         >
           <div className="flex items-center gap-2">
@@ -179,7 +179,7 @@ export default function DmBar() {
             <span className="text-[14px]">Quests</span>
           </div>
         </div> */}
-      </div> 
+      </div>
 
       {/* DMs Section */}
       <div className="flex-1 overflow-y-auto scrollbar-hide">
@@ -200,8 +200,8 @@ export default function DmBar() {
                   className={clsx(
                     "flex items-center rounded-[5px] cursor-pointer gap-1 transition-colors",
                     isActive
-                      ? "bg-(--background-secondary-alt)"
-                      : "hover:bg-(--background-secondary)"
+                      ? "bg-(--background-modifier-selected) text-(--text-primary)"
+                      : "text-(--text-secondary) hover:bg-(--background-modifier-hover) hover:text-(--text-primary) active:bg-(--background-modifier-active)"
                   )}
                 >
                   <div className="relative p-1">

@@ -1,13 +1,23 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./authSlice";
-import socketReducer from "./socketSlice";
 import themeReducer from "./themeSlice";
+import friendsReducer from "./slices/friendsSlice";
+import requestsReducer from "./slices/requestsSlice";
+import chatReducer from "./slices/chatSlice";
+import presenceReducer from "./slices/presenceSlice";
+import serversReducer from "./slices/serversSlice";
+import socketConnectionReducer from "./slices/socketConnectionSlice";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    socket: socketReducer,
     theme: themeReducer,
+    friends: friendsReducer,
+    requests: requestsReducer,
+    chat: chatReducer,
+    presence: presenceReducer,
+    servers: serversReducer,
+    socketConnection: socketConnectionReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -17,4 +27,3 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-

@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import clsx from "clsx";
-
-type FriendsTab = "all" | "online" | "pending" | "blocked" | "addFriend";
+import { useFriendsTab, type FriendsTab } from "@/context/FriendsTabContext";
 
 export default function TopBarFriends() {
-  const [activeTab, setActiveTab] = useState<FriendsTab>("all");
+  const { activeTab, setActiveTab } = useFriendsTab();
 
   const tabs: { id: FriendsTab; label: string }[] = [
     { id: "online", label: "Online" },
@@ -23,19 +22,19 @@ export default function TopBarFriends() {
   const getTabStyles = (tabId: FriendsTab) => {
     if (activeTab === tabId) {
       if (tabId === "addFriend") {
-        return "text-[#8185e6] bg-[#242649]";
+        return "text-(--status-success) bg-(--status-success)/10";
       }
-      return "text-white bg-[#393c43]";
+      return "text-(--text-primary) bg-(--background-modifier-selected)";
     } else {
       if (tabId === "addFriend") {
-        return "text-white bg-(--bg-brand)";
+        return "text-white bg-(--status-success)";
       }
-      return "text-[#b5bac1] hover:text-white hover:bg-[#35373c]";
+      return "text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--background-modifier-hover)";
     }
   };
 
   return (
-    <div className="h-[50px] border-b border-t border-(--border-normal) flex items-center px-4 bg-[#2b2d31] select-none">
+    <div className="h-[50px] border-b border-t border-(--border-normal) flex items-center px-4 select-none">
       <div className="flex items-center gap-6">
         {tabs.map((tab) => (
           <button

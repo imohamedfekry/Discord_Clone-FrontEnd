@@ -11,7 +11,7 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'default', size = 'default', loading, children, ...props }, ref) => {
     const baseStyles = "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-    
+
     const variants = {
       default: "bg-[var(--accent-primary)] text-white hover:bg-[hsl(var(--accent-primary-h),var(--accent-primary-s),calc(var(--accent-primary-l)-var(--hover-darken)))] focus-visible:ring-[var(--border-focus)]",
       destructive: "bg-[var(--accent-danger)] text-white hover:bg-[hsl(var(--accent-danger-h),var(--accent-danger-s),calc(var(--accent-danger-l)-var(--hover-darken)))]",

@@ -61,9 +61,32 @@ export const fetchCurrentUser = createAsyncThunk(
   "auth/fetchCurrentUser",
   async (_, thunkAPI) => {
     try {
-      const data = await authApi.getMe();
-      return data;
+      const response = await authApi.getMe();
+      console.log("✅ Fetched user data:", response.data);
+
+      // Handle different response structures
+      // API might return: { data: { user: {...} } } or { user: {...} } or just {...}
+      let userData;
+
+      if (response && typeof response === 'object') {
+        // Check if response has nested data.user structure
+        if ('data' in response && response.data && typeof response.data === 'object') {
+          userData = 'user' in response.data ? response.data.user : response.data;
+        }
+        // Check if response has user property directly
+        else if ('user' in response) {
+          userData = response.user;
+        }
+        // Otherwise assume response is the user object itself
+        else {
+          userData = response;
+        }
+      }
+
+      console.log('✅ Fetched user data:', userData);
+      return userData as AuthUser;
     } catch (error) {
+      console.error('❌ Failed to fetch current user:', error);
       return thunkAPI.rejectWithValue(getErrorMessage(error));
     }
   }
@@ -153,12 +176,14 @@ const authSlice = createSlice({
         state.status = "succeeded";
         state.user = action.payload;
         state.initialized = true;
+        console.log('✅ User loaded into Redux:', action.payload);
       })
       .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.status = "failed";
         state.user = null;
         state.error = (action.payload as string) || action.error.message || null;
         state.initialized = true;
+        console.error('❌ fetchCurrentUser rejected:', action.payload || action.error.message);
       })
       .addCase(loginUser.pending, (state) => {
         state.status = "loading";
@@ -202,4 +227,3 @@ const authSlice = createSlice({
 
 export const { setUser, setToken } = authSlice.actions;
 export default authSlice.reducer;
-

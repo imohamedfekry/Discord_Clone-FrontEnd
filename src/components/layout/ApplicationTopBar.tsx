@@ -71,81 +71,91 @@ export default function ApplicationTopBar() {
   const getTitle = (): string => {
     if (pathname?.startsWith("/channels/@me/")) {
       const dmId = pathname.split("/channels/@me/")[1];
-      return `DM with User ${dmId}`;
+      return `Direct Message`;
     }
     if (pathname === "/channels/@me") {
       return "Friends";
     }
     if (pathname?.startsWith("/channels/")) {
-      return "Server Channel";
+      return "Channel";
     }
     return "Discord";
   };
 
   return (
-    <header className="flex items-center justify-between bg-(--background-base-lowest) shrink-0 px-2">
+    <header
+      className="flex items-center justify-between bg-(--background-base-lowest) shrink-0 px-2"
+      role="banner"
+      aria-label="Application navigation"
+    >
       {/* Left Nav */}
-      <div className="flex items-center gap-1">
+      <nav className="flex items-center gap-1" aria-label="History navigation">
         <Tooltip text="Back" side="bottom-left">
-        <button
-          onClick={handleBack}
-          disabled={!canGoBack}
-          className={clsx(
-            "transition-colors p-1 rounded",
-            canGoBack
-              ? "text-(--text-primary) hover:bg-(--background-secondary) cursor-pointer"
-              : "text-(--text-tertiary) cursor-not-allowed opacity-50"
-          )}
-          aria-label="Back"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            fill="currentColor"
-            viewBox="0 0 24 24"
+          <button
+            onClick={handleBack}
+            disabled={!canGoBack}
+            className={clsx(
+              "transition-colors p-1 rounded",
+              canGoBack
+                ? "text-(--text-primary) hover:bg-(--background-secondary) cursor-pointer"
+                : "text-(--text-tertiary) cursor-not-allowed opacity-50"
+            )}
+            aria-label="Navigate back"
+            aria-disabled={!canGoBack}
+            tabIndex={canGoBack ? 0 : -1}
           >
-            <path d="M3.3 11.3a1 1 0 0 0 0 1.4l5 5a1 1 0 0 0 1.4-1.4L6.42 13H20a1 1 0 1 0 0-2H6.41l3.3-3.3a1 1 0 0 0-1.42-1.4l-5 5Z" />
-          </svg>
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path d="M3.3 11.3a1 1 0 0 0 0 1.4l5 5a1 1 0 0 0 1.4-1.4L6.42 13H20a1 1 0 1 0 0-2H6.41l3.3-3.3a1 1 0 0 0-1.42-1.4l-5 5Z" />
+            </svg>
+          </button>
         </Tooltip>
-                <Tooltip text="Back" side="bottom">
-
-        <button
-          onClick={handleForward}
-          disabled={!canGoForward}
-          className={clsx(
-            "transition-colors p-2 rounded",
-            canGoForward
-              ? "text-(--text-primary) hover:bg-(--background-secondary) cursor-pointer"
-              : "text-(--text-tertiary) cursor-not-allowed opacity-50"
-          )}
-          aria-label="Forward"
-        >
-
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            fill="currentColor"
-            viewBox="0 0 24 24"
+        <Tooltip text="Forward" side="bottom">
+          <button
+            onClick={handleForward}
+            disabled={!canGoForward}
+            className={clsx(
+              "transition-colors p-2 rounded",
+              canGoForward
+                ? "text-(--text-primary) hover:bg-(--background-secondary) cursor-pointer"
+                : "text-(--text-tertiary) cursor-not-allowed opacity-50"
+            )}
+            aria-label="Navigate forward"
+            aria-disabled={!canGoForward}
+            tabIndex={canGoForward ? 0 : -1}
           >
-            <path d="M20.7 12.7a1 1 0 0 0 0-1.4l-5-5a1 1 0 1 0-1.4 1.4l3.29 3.3H4a1 1 0 1 0 0 2h13.59l-3.3 3.3a1 1 0 0 0 1.42 1.4l5-5Z" />
-          </svg>
-        </button>
-                </Tooltip>
-
-      </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path d="M20.7 12.7a1 1 0 0 0 0-1.4l-5-5a1 1 0 1 0-1.4 1.4l3.29 3.3H4a1 1 0 1 0 0 2h13.59l-3.3 3.3a1 1 0 0 0 1.42 1.4l5-5Z" />
+            </svg>
+          </button>
+        </Tooltip>
+      </nav>
 
       {/* Middle - Title */}
       <div className="flex-1 text-left ml-4">
-        <h1 className="text-(--text-primary) text-[15px] text-center font-semibold">
+        <h1
+          className="text-(--text-primary) text-[15px] text-center font-semibold"
+          id="page-title"
+        >
           {getTitle()}
         </h1>
       </div>
 
       {/* Right side (actions) */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2" role="toolbar" aria-label="Page actions">
         {/* Add actions here later */}
       </div>
     </header>

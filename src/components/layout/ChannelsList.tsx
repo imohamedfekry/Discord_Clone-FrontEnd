@@ -24,7 +24,7 @@ export default function ChannelsList() {
   return (
     <aside
       className={clsx(
-        "bg-(--background-base-low) flex flex-col h-full border-r border-(--border-normal) relative overflow-hidden flex-none",
+        "bg-(--background-base-lowest) flex flex-col h-full border-r border-(--border-normal) relative overflow-hidden flex-none",
         isResizing && "select-none"
       )}
       style={{
@@ -67,8 +67,8 @@ export default function ChannelsList() {
               key={channel.id}
               className={clsx(
                 "w-full px-2 py-1.5 rounded text-sm text-left transition-colors",
-                "hover:bg-(--background-secondary) text-(--text-secondary)",
-                "hover:text-(--text-primary) flex items-center gap-2"
+                "hover:bg-(--background-modifier-hover) text-(--text-secondary)",
+                "hover:text-(--text-primary) active:bg-(--background-modifier-active) flex items-center gap-2"
               )}
             >
               {channel.type === "text" ? (

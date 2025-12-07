@@ -62,34 +62,38 @@ export default function ServersBar() {
       <div className={clsx("w-full flex flex-col items-center gap-2 mt-1")}>
         {Array.from({ length: 5 }).map((_, i) => (
           <Tooltip key={i} text={`Server ${i + 1}`} side="right">
+            <div className="w-full relative items-center flex serverhover">
             <button
               aria-label={`Server ${i + 1}`}
-              className="relative w-10 h-10"
+              className="relative w-10 h-10 m-auto"
             >
               <img
                 src="https://cdn.discordapp.com/icons/169256939211980800/b6d536d1332bd67725ca03729348c035.png?size=100&quality=lossless"
                 alt={`Server ${i + 1}`}
-                className="w-full h-full rounded-lg"
+                className="h-full rounded-lg"
               />
               <div className="absolute -right-1 -bottom-1">
                 <Badge count={i + 1} border={true} />
               </div>
             </button>
+            </div>
+
+
           </Tooltip>
         ))}
         <Tooltip text="Add a Server" side="right">
           <button
             aria-label="Add Server"
-            className="relative w-10 h-10 bg-(--background-secondary) text-slate-800 dark:text-white hover:text-white text-3xl flex items-center justify-center transition-all duration-200 hover:bg-(--bg-brand) rounded-lg"
+            className="relative w-10 h-10 bg-(--background-secondary) text-(--status-success) hover:text-white text-3xl flex items-center justify-center transition-all duration-200 hover:bg-(--status-success) rounded-lg"
           >
-              <AddServerIcon className="w-5 h-5"  />
+            <AddServerIcon className="w-5 h-5" />
           </button>
         </Tooltip>
 
         <Tooltip text="Explore Public Servers" side="right">
           <button
             aria-label="Explore Public Servers"
-            className="relative w-10 h-10 bg-(--background-secondary) text-slate-800 dark:text-white hover:text-white text-3xl flex items-center justify-center transition-all duration-200 hover:bg-(--bg-brand) rounded-lg"
+            className="relative w-10 h-10 bg-(--background-secondary) text-(--status-success) hover:text-white text-3xl flex items-center justify-center transition-all duration-200 hover:bg-(--status-success) rounded-lg"
           >
             <ExploreServersIcon className="w-5 h-5" />
           </button>

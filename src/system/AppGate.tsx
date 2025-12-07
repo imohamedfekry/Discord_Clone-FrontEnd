@@ -1,28 +1,30 @@
 "use client";
 
 import { useMemo } from "react";
-import { useSocket } from "@/context/SocketContext";
-import { useAuth } from "@/components/hooks/useAuth";
+import { useSocket } from "@/socket";
+import { useAuth } from "@/hooks/useAuth";
 import { useAppSelector } from "@/store/hooks";
-import type { RootState } from "@/store";
-import type { SocketState } from "@/store/socketSlice";
-
-const selectSocketState = (state: RootState): SocketState => state.socket as SocketState;
+import { selectFriends, selectIncomingRequests, selectOutgoingRequests } from "@/store/selectors";
 
 export default function AppGate({ children }: { children: React.ReactNode }) {
   const { user, initialized } = useAuth();
-  const { connected } = useSocket();
-  const { friends, incomingRequests, outgoingRequests } = useAppSelector(selectSocketState);
+  const { isConnected } = useSocket();
+
+  // Select data from new slices
+  const friends = useAppSelector(selectFriends);
+  const incomingRequests = useAppSelector(selectIncomingRequests);
+  const outgoingRequests = useAppSelector(selectOutgoingRequests);
+
   const sessionLoading = !initialized;
 
   const initialLoaded = useMemo(() => {
-    if (!connected) return false;
-    return (
-      friends !== undefined &&
-      incomingRequests !== undefined &&
-      outgoingRequests !== undefined
-    );
-  }, [connected, friends, incomingRequests, outgoingRequests]);
+    if (!isConnected) return false;
+    // In the new architecture, we assume data is loaded if we are connected and have initial state.
+    // You might want to add specific 'loading' flags in your slices if you need to track initial fetch status explicitly.
+    // For now, we'll assume if we are connected, we are good to go or data will stream in.
+    // To be more robust, you could add 'isLoaded' to your slices.
+    return true;
+  }, [isConnected]);
 
   // ---- Discord-Like Loading Phases ----
 
@@ -36,6 +38,13 @@ export default function AppGate({ children }: { children: React.ReactNode }) {
   }
 
   // 2) User not logged in
+  console.log("AppGate Debug:", {
+    user,
+    initialized,
+    sessionLoading,
+    authStatus: user ? 'authenticated' : 'not authenticated'
+  });
+
   if (!user) {
     return (
       <div className="flex items-center justify-center w-full h-screen bg-[#202225] text-white">
@@ -45,7 +54,7 @@ export default function AppGate({ children }: { children: React.ReactNode }) {
   }
 
   // 3) Socket not connected yet (Discord style: Connecting to Gateway)
-  if (!connected) {
+  if (!isConnected) {
     return (
       <div className="flex items-center justify-center w-full h-screen bg-[#202225] text-white">
         <div className="text-xl animate-pulse">Connecting to Gateway...</div>
@@ -54,6 +63,9 @@ export default function AppGate({ children }: { children: React.ReactNode }) {
   }
 
   // 4) Initial data not received yet (Discord: Fetching Messages / Loading friends)
+  // With the new architecture, we might want to skip this or implement a proper 'initial fetch' status.
+  // For now, since initialLoaded is just true when connected, this block is effectively skipped, 
+  // which is fine as data will appear as it arrives.
   if (!initialLoaded) {
     return (
       <div className="flex items-center justify-center w-full h-screen bg-[#202225] text-white flex-col gap-4">

@@ -1,7 +1,8 @@
-import { api } from "./api";
+import { apiClient } from "@/lib/apiClient";
 import { endpoints } from "./endpoints";
 import axios from "axios";
 import { API_BASE_URL } from "@/config/env";
+import { AuthUser } from "@/store/authSlice";
 
 interface RegisterPayload {
   username: string;
@@ -18,23 +19,19 @@ interface LoginPayload {
 
 export const authApi = {
   async register(data: RegisterPayload) {
-    const res = await api.post(endpoints.auth.register, data);
-    return res.data;
+    return apiClient.post(endpoints.auth.register, data);
   },
 
   async login(data: LoginPayload) {
-    const res = await api.post(endpoints.auth.login, data);
-    return res.data;
+    return apiClient.post(endpoints.auth.login, data);
   },
 
-  async getMe() {
-    const res = await api.get(endpoints.me.meProfile);
-    return res.data;
+  async getMe(): Promise<AuthUser> {
+    return apiClient.get<AuthUser>(endpoints.me.meProfile);
   },
 
   async logout() {
-    const res = await api.post("/auth/logout");
-    return res.data;
+    return apiClient.post("/auth/logout");
   },
 };
 
